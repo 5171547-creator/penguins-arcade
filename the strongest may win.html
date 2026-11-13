@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE STRONGEST MAY WIN</title>
+    <!-- Tailwind CSS (Allowed Whitelist) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts (Allowed Whitelist) -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: #0d0e12;
+            color: #fff;
+            overflow-x: hidden;
+            user-select: none;
+        }
+        .font-cyber {
+            font-family: 'Orbitron', sans-serif;
+        }
+        .neon-border {
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.5), inset 0 0 15px rgba(239, 68, 68, 0.2);
+            border: 2px solid rgba(239, 68, 68, 0.8);
+        }
+        .neon-border-blue {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5), inset 0 0 15px rgba(59, 130, 246, 0.2);
+            border: 2px solid rgba(59, 130, 246, 0.8);
+        }
+        .neon-text-purple {
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.8), 0 0 20px rgba(168, 85, 247, 0.4);
+        }
+        /* Custom scrollbar for shop and selectors */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111827;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ef4444;
+        }
+    </style>
+</head>
+<body class="w-screen h-screen flex justify-center items-center p-2 sm:p-4">
+
+    <!-- Main Game Container Panel -->
+    <div id="game-app" class="relative w-full max-w-5xl h-[92vh] max-h-[720px] bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden flex flex-col shadow-2xl">
+        
+        <!-- Top Status Bar (Persistent header for coins/navigation) -->
+        <div class="w-full bg-gray-950 border-b border-gray-800 px-6 py-3 flex justify-between items-center z-10">
+            <div class="flex items-center space-x-2">
+                <span class="text-red-500 font-black text-xl tracking-wider font-cyber animate-pulse">⚡ TSWM</span>
+                <span class="text-gray-500 text-xs hidden sm:inline">| ARCADE BRAWLER</span>
+            </div>
+            <!-- Coins Display System -->
+            <div class="flex items-center space-x-2 bg-gray-900 border border-yellow-600/40 px-3 py-1 rounded-full">
+                <span class="text-yellow-400 font-bold text-lg font-cyber">🪙</span>
+                <span id="global-coins" class="text-yellow-400 font-extrabold tracking-widest font-cyber">0</span>
+            </div>
+        </div>
+
+        <!-- SCREEN: MAIN MENU -->
+        <div id="screen-menu" class="flex-1 flex flex-col items-center justify-start sm:justify-center p-6 relative bg-gradient-to-b from-gray-900 via-gray-950 to-black overflow-y-auto">
+            <div class="text-center mb-6 mt-4 sm:mt-0 max-w-xl">
+                <h1 class="text-4xl sm:text-6xl font-black font-cyber tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-purple-500 to-blue-500 mb-2">
+                    THE STRONGEST MAY WIN
+                </h1>
+                <p class="text-gray-400 tracking-widest text-sm uppercase">Multiverse Shonen Battle Arena</p>
+            </div>
+
+            <!-- Mode Selector Matrix Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-3xl mb-8">
+                <button onclick="selectGameMode('1P')" class="group p-4 bg-gray-950 border border-gray-800 hover:border-red-500 rounded-xl transition text-left flex items-center justify-between">
+                    <div>
+                        <div class="text-white font-bold text-lg group-hover:text-red-400 transition font-cyber">1 PLAYER MODE</div>
+                        <div class="text-gray-500 text-xs mt-0.5">Solo practice battle vs aggressive AI Bot.</div>
+                    </div>
+                    <span class="text-2xl opacity-60 group-hover:opacity-100 transition">👤</span>
+                </button>
+
+                <button onclick="selectGameMode('2P')" class="group p-4 bg-gray-950 border border-gray-800 hover:border-blue-500 rounded-xl transition text-left flex items-center justify-between">
+                    <div>
+                        <div class="text-white font-bold text-lg group-hover:text-blue-400 transition font-cyber">2 PLAYER MODE</div>
+                        <div class="text-gray-500 text-xs mt-0.5">Local 1v1 split layout on 1 keyboard.</div>
+                    </div>
+                    <span class="text-2xl opacity-60 group-hover:opacity-100 transition">👥</span>
+                </button>
+
+                <button onclick="selectGameMode('3P')" class="group p-4 bg-gray-950 border border-gray-800 hover:border-purple-500 rounded-xl transition text-left flex items-center justify-between">
+                    <div>
+                        <div class="text-white font-bold text-lg group-hover:text-purple-400 transition font-cyber">3 PLAYER BRAWL</div>
+                        <div class="text-gray-500 text-xs mt-0.5">P1 & P2 Local humans vs 1 Elite Chaos Bot.</div>
+                    </div>
+                    <span class="text-2xl opacity-60 group-hover:opacity-100 transition">🔺</span>
+                </button>
+
+                <button onclick="selectGameMode('2V2')" class="group p-4 bg-gray-950 border border-gray-800 hover:border-green-500 rounded-xl transition text-left flex items-center justify-between">
+                    <div>
+                        <div class="text-white font-bold text-lg group-hover:text-green-400 transition font-cyber">2V2 TEAM MATCH</div>
+                        <div class="text-gray-500 text-xs mt-0.5">P1 + Bot vs P2 + Bot tactical skirmish.</div>
+                    </div>
+                    <span class="text-2xl opacity-60 group-hover:opacity-100 transition">⚔️</span>
+                </button>
+
+                <button onclick="selectGameMode('FFA')" class="group sm:col-span-2 lg:col-span-2 p-4 bg-gradient-to-r from-red-950/40 to-purple-950/40 border border-purple-900/60 hover:border-yellow-500 rounded-xl transition text-left flex items-center justify-between">
+                    <div>
+                        <div class="text-yellow-400 font-black text-lg font-cyber tracking-wide">8-PLAYER FREE FOR ALL LOBBY</div>
+                        <div class="text-gray-300 text-xs mt-0.5">All-out structural chaos. Survival match against 6-7 lethal bots.</div>
+                    </div>
+                    <span class="text-2xl animate-bounce">🔥</span>
+                </button>
+            </div>
+
+            <!-- Global Action Navigation Buttons -->
+            <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 w-full max-w-md justify-center mb-4">
+                <button onclick="openShop()" class="px-8 py-3 bg-yellow-600 hover:bg-yellow-500 text-black font-extrabold rounded-lg font-cyber tracking-wider transition transform hover:scale-105 shadow-lg shadow-yellow-600/20 text-center">
+                    🛍️ ANIME ROSTER SHOP
+                </button>
+                <button onclick="showControlsModal()" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold rounded-lg transition text-center">
+                    🎮 CONTROLS / HOW TO PLAY
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN: CHARACTER SELECTOR -->
+        <div id="screen-select" class="hidden flex-1 flex flex-col p-6 bg-gray-950 overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 id="select-title" class="text-2xl font-black font-cyber text-white tracking-wide">SELECT YOUR FIGHTER</h2>
+                    <p id="select-subtitle" class="text-gray-400 text-sm">Configuring character allocations for the lobby</p>
+                </div>
+                <button onclick="backToMenu()" class="text-gray-400 hover:text-white border border-gray-800 px-3 py-1 rounded transition text-sm">← CANCEL</button>
+            </div>
+
+            <!-- Configuration Prompt banner -->
+            <div id="player-indicator-banner" class="w-full bg-red-950/40 border border-red-800/60 text-red-200 px-4 py-2 rounded-lg text-sm font-bold font-cyber mb-6 animate-pulse">
+                PLAYER 1: SELECT A HERO
+            </div>
+
+            <!-- Character Grid Roster -->
+            <div id="character-selection-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 flex-1">
+                <!-- Programmatically populated template -->
+            </div>
+
+            <!-- Lock in and verification deck footer -->
+            <div class="mt-6 pt-4 border-t border-gray-800 flex justify-end">
+                <button id="btn-start-match" disabled onclick="initiateBattlefield()" class="px-10 py-4 bg-gray-800 text-gray-500 font-black font-cyber tracking-widest rounded-xl transition cursor-not-allowed">
+                    LOCK IN ROSTER & LIVE START →
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN: SHOP / UNLOCK CENTRE -->
+        <div id="screen-shop" class="hidden flex-1 flex flex-col p-6 bg-gray-950 overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-3xl font-black font-cyber text-yellow-400 tracking-wide">SUMMONS & CHARACTERS SHOP</h2>
+                    <p class="text-gray-400 text-sm">Spend tokens earned in battlegrounds to expand your combat options.</p>
+                </div>
+                <button onclick="backToMenu()" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition font-bold">← MAIN MENU</button>
+            </div>
+
+            <!-- Shop Items Grid layout -->
+            <div id="shop-items-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <!-- Programmatically loaded -->
+            </div>
+        </div>
+
+        <!-- SCREEN: ACTIVE CANVAS BATTLEGROUND -->
+        <div id="screen-battle" class="hidden flex-1 relative flex flex-col bg-black">
+            <!-- Combat Stats / Minimalist Heads Up Display Overlay -->
+            <div class="absolute top-0 left-0 w-full p-3 bg-gradient-to-b from-black/80 to-transparent flex justify-between items-center pointer-events-none z-10">
+                <div id="hud-p1-card" class="bg-gray-900/90 border-l-4 border-red-500 px-3 py-1.5 rounded shadow text-xs min-w-[140px]">
+                    <div class="font-cyber font-bold text-red-400 flex justify-between"><span id="hud-p1-name">P1</span> <span class="text-gray-500">HP</span></div>
+                    <div class="w-full bg-gray-800 h-2 rounded mt-1 overflow-hidden"><div id="hud-p1-hp" class="bg-red-500 h-full w-full transition-all"></div></div>
+                </div>
+
+                <div id="hud-p2-card" class="bg-gray-900/90 border-l-4 border-blue-500 px-3 py-1.5 rounded shadow text-xs min-w-[140px] hidden">
+                    <div class="font-cyber font-bold text-blue-400 flex justify-between"><span id="hud-p2-name">P2</span> <span class="text-gray-500">HP</span></div>
+                    <div class="w-full bg-gray-800 h-2 rounded mt-1 overflow-hidden"><div id="hud-p2-hp" class="bg-blue-500 h-full w-full transition-all"></div></div>
+                </div>
+
+                <div class="bg-gray-900/80 px-4 py-1 rounded border border-gray-800 text-center font-cyber">
+                    <div class="text-[10px] text-gray-500 tracking-wider">REMAINING FIGHTERS</div>
+                    <div id="hud-alive-count" class="text-xl font-black text-yellow-400">8</div>
+                </div>
+            </div>
+
+            <!-- Game Arena Canvas Element -->
+            <div class="flex-1 w-full h-full relative overflow-hidden bg-gray-950 flex items-center justify-center">
+                <canvas id="battleCanvas" class="block bg-gray-950 max-w-full max-h-full"></canvas>
+            </div>
+            
+            <!-- Bottom Live Action Console ticker -->
+            <div id="battle-ticker" class="bg-gray-950 border-t border-gray-900 px-4 py-2 text-center text-xs font-mono text-green-400 tracking-wide uppercase">
+                ARENA MATCH STARTED. THE STRONGEST MAY WIN!
+            </div>
+        </div>
+
+        <!-- MODAL OVERLAY: CONTROLS & HOW TO PLAY -->
+        <div id="modal-controls" class="hidden absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-lg p-6 relative max-h-[90%] overflow-y-auto">
+                <h3 class="text-2xl font-black font-cyber text-white mb-4 tracking-wide border-b border-gray-800 pb-2">COMBAT OPERATION MANUAL</h3>
+                
+                <div class="space-y-4 text-sm text-gray-300">
+                    <div class="bg-gray-950 p-3 rounded-lg border border-red-900/30">
+                        <div class="font-cyber font-bold text-red-400 mb-1">🔴 PLAYER 1 CONTROLS</div>
+                        <p><b class="text-white">Movement:</b> <span class="bg-gray-800 px-1 rounded text-xs font-mono">W</span> <span class="bg-gray-800 px-1 rounded text-xs font-mono">A</span> <span class="bg-gray-800 px-1 rounded text-xs font-mono">S</span> <span class="bg-gray-800 px-1 rounded text-xs font-mono">D</span> keys</p>
+                        <p class="mt-1"><b class="text-white">Basic Melee Strike:</b> <span class="bg-gray-800 px-1 rounded text-xs font-mono">F</span> key</p>
+                        <p class="mt-1"><b class="text-white">Signature Jutsu/Skill Projectile:</b> <span class="bg-gray-800 px-1 rounded text-xs font-mono">G</span> key</p>
+                    </div>
+
+                    <div class="bg-gray-950 p-3 rounded-lg border border-blue-900/30">
+                        <div class="font-cyber font-bold text-blue-400 mb-1">🔵 PLAYER 2 CONTROLS (Multiplayer Modes)</div>
+                        <p><b class="text-white">Movement:</b> <span class="bg-gray-800 px-1 rounded text-xs font-mono">↑</span> <span class="bg-gray-800 px-1 rounded text-xs font-mono">←</span> <span class="bg-gray-800 px-1 rounded text-xs font-mono">↓</span> <span class="bg-gray-800 px-1 rounded text-xs font-mono">→</span> Arrow Keys</p>
+                        <p class="mt-1"><b class="text-white">Basic Melee Strike:</b> <span class="bg-gray-800 px-1 rounded text-xs font-mono">L</span> key</p>
+                        <p class="mt-1"><b class="text-white">Signature Jutsu/Skill Projectile:</b> <span class="bg-gray-800 px-1 rounded text-xs font-mono">K</span> key</p>
+                    </div>
+
+                    <div class="bg-gray-950 p-3 rounded-lg text-xs space-y-1 text-gray-400">
+                        <p>🔹 <b>Lobby Formats:</b> Single Player puts you with 1 Bot. 2 Player is a split controller dueling match. Free-For-All injects 8 combatants simultaneously onto the grid.</p>
+                        <p class="pt-1">🪙 <b>Progression Matrix:</b> Defeat enemies or endure inside the lobby to gather high-value coins. Use coins to acquire tier-S characters like Gojo or Sukuna in the Roster summon store.</p>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <button onclick="closeControlsModal()" class="px-5 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg font-cyber text-sm tracking-wider transition">
+                        ACKNOWLEDGED
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL OVERLAY: MATCH RESULTS SUMMARY -->
+        <div id="modal-victory" class="hidden absolute inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-50">
+            <div class="text-center p-8 bg-gray-950 neon-border rounded-2xl max-w-md w-full animate-fade-in">
+                <div class="text-yellow-400 font-cyber font-black text-2xl tracking-widest mb-1">MATCH TERMINATED</div>
+                <h4 id="victory-headline" class="text-3xl font-black font-cyber text-white uppercase mb-4">VICTORY</h4>
+                
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 mb-6">
+                    <div class="text-gray-400 text-sm mb-1">Tokens Retreived From Field Operations</div>
+                    <div class="text-yellow-400 text-4xl font-black font-cyber tracking-wider animate-bounce">+🪙<span id="victory-reward-coins">0</span></div>
+                    <div id="victory-reason" class="text-xs text-gray-500 mt-2 uppercase font-mono tracking-wider">Survivor Standing Achieved</div>
+                </div>
+
+                <button onclick="resetApplicationContext()" class="w-full py-3 bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-500 hover:to-purple-500 text-white font-black font-cyber tracking-widest rounded-xl transition">
+                    RETURN TO OPERATIONS HUB
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- UI State Handling Logic & Gameplay Code -->
+    <script>
+        // Character Database Configuration
+        const CHAR_ROSTER = [
+            { id: 'beginning_end', name: 'The Beginning and the End', anime: 'Cosmic Entity', skill: 'Absolute Erasure', color: '#f43f5e', specialColor: '#a855f7', emoji: '🌌', baseHp: 999, speed: 6.0, cost: 0 },
+            { id: 'asta', name: 'Asta', anime: 'Black Clover', skill: 'Demon-Slayer Slash', color: '#34d399', specialColor: '#10b981', emoji: '⚔️', baseHp: 130, speed: 4, cost: 0 },
+            { id: 'yuno', name: 'Yuno', anime: 'Black Clover', skill: 'Spirit Storm Spear', color: '#6ee7b7', specialColor: '#059669', emoji: '🌪️', baseHp: 110, speed: 4.5, cost: 250 },
+            { id: 'yuji', name: 'Yuji Itadori', anime: 'Jujutsu Kaisen', skill: 'Divergent Fist', color: '#f87171', specialColor: '#ef4444', emoji: '👊', baseHp: 140, speed: 3.8, cost: 0 },
+            { id: 'gojo', name: 'Gojo Satoru', anime: 'Jujutsu Kaisen', skill: 'Hollow Purple', color: '#a855f7', specialColor: '#c084fc', emoji: '👁️', baseHp: 160, speed: 4.2, cost: 600 },
+            { id: 'sukuna', name: 'Ryomen Sukuna', anime: 'Jujutsu Kaisen', skill: 'Dismantle Cleave', color: '#b91c1c', specialColor: '#f43f5e', emoji: '💀', baseHp: 170, speed: 4.0, cost: 800 },
+            { id: 'gon', name: 'Gon Freecss', anime: 'Hunter x Hunter', skill: 'Jajanken Rock', color: '#4ade80', specialColor: '#22c55e', emoji: '🎣', baseHp: 120, speed: 4.1, cost: 0 },
+            { id: 'killua', name: 'Killua Zoldyck', anime: 'Hunter x Hunter', skill: 'Godspeed Bolt', color: '#60a5fa', specialColor: '#3b82f6', emoji: '⚡', baseHp: 115, speed: 5.2, cost: 450 },
+            { id: 'deku', name: 'Izuku Midoriya', anime: 'My Hero Academia', skill: 'Detroit Smash', color: '#a7f3d0', specialColor: '#34d399', emoji: '🥦', baseHp: 135, speed: 4.3, cost: 0 },
+            { id: 'bakugo', name: 'Katsuki Bakugo', anime: 'My Hero Academia', skill: 'AP Shot Explosion', color: '#fb923c', specialColor: '#f97316', emoji: '💥', baseHp: 125, speed: 4.2, cost: 350 },
+            { id: 'todoroki', name: 'Shoto Todoroki', anime: 'My Hero Academia', skill: 'Glacial Fire Spark', color: '#e2e8f0', specialColor: '#ef4444', emoji: '❄️', baseHp: 130, speed: 3.9, cost: 500 }
+        ];
+
+        // State Machine Cache
+        let state = {
+            coins: 0,
+            unlockedChars: ['beginning_end', 'asta', 'yuji', 'gon', 'deku'], // Overpowered custom character instantly unlocked
+            currentMode: null, // '1P', '2P', '3P', '2V2', 'FFA'
+            selectionStep: 1,  // Track configuration mapping sequence
+            selectedP1: null,
+            selectedP2: null
+        };
+
+        // Core Canvas Engine Context variables
+        const canvas = document.getElementById('battleCanvas');
+        const ctx = canvas.getContext('2d');
+        let gameLoopId = null;
+        let gameActive = false;
+        let arenaWidth = 900;
+        let arenaHeight = 550;
+
+        // Runtime Entities collections
+        let players = [];
+        let projectiles = [];
+        let particles = [];
+        let matchCoinsEarned = 0;
+
+        // Input Trackers Maps
+        const keysPressed = {};
+
+        // Lifecycle Entrypoint
+        window.addEventListener('load', () => {
+            loadProgressFromStorage();
+            renderCoinCounters();
+            setupKeyboardListeners();
+            window.addEventListener('resize', handleCanvasRescale);
+        });
+
+        // Persistent Save Protocols
+        function saveProgressToStorage() {
+            localStorage.setItem('tswm_coins_2026', state.coins.toString());
+            localStorage.setItem('tswm_unlocked_2026', JSON.stringify(state.unlockedChars));
+        }
+
+        function loadProgressFromStorage() {
+            const savedCoins = localStorage.getItem('tswm_coins_2026');
+            const savedChars = localStorage.getItem('tswm_unlocked_2026');
+            if (savedCoins !== null) state.coins = parseInt(savedCoins, 10);
+            if (savedChars !== null) {
+                const parsed = JSON.parse(savedChars);
+                // Ensure custom god character remains added to the save list
+                if (!parsed.includes('beginning_end')) parsed.push('beginning_end');
+                state.unlockedChars = parsed;
+            }
+        }
+
+        function renderCoinCounters() {
+            document.getElementById('global-coins').innerText = state.coins;
+        }
+
+        // Screen Routing Pipeline
+        function backToMenu() {
+            document.getElementById('screen-select').classList.add('hidden');
+            document.getElementById('screen-shop').classList.add('hidden');
+            document.getElementById('screen-battle').classList.add('hidden');
+            document.getElementById('screen-menu').classList.remove('hidden');
+            terminateBattlefieldLoop();
+        }
+
+        function openShop() {
+            document.getElementById('screen-menu').classList.add('hidden');
+            document.getElementById('screen-shop').classList.remove('hidden');
+            buildShopCardsDom();
+        }
+
+        // Mode Entry Router
+        function selectGameMode(modeType) {
+            state.currentMode = modeType;
+            state.selectionStep = 1;
+            state.selectedP1 = null;
+            state.selectedP2 = null;
+
+            document.getElementById('screen-menu').classList.add('hidden');
+            document.getElementById('screen-select').classList.remove('hidden');
+            
+            // Adjust title metadata based on configuration context
+            const titleEl = document.getElementById('select-title');
+            const subEl = document.getElementById('select-subtitle');
+            
+            titleEl.innerText = `${modeType} MODE CHARACTER ASSIGNMENT`;
+            subEl.innerText = `Select anime fighters to load into this battle matrix setup.`;
+            
+            evaluateSelectionPromptState();
+            buildCharacterSelectorGrid();
+        }
+
+        // Contextual updates dynamically indicating who needs to pick what
+        function evaluateSelectionPromptState() {
+            const banner = document.getElementById('player-indicator-banner');
+            const lockButton = document.getElementById('btn-start-match');
+
+            // Reset lookups
+            lockButton.disabled = true;
+            lockButton.className = "px-10 py-4 bg-gray-800 text-gray-500 font-black font-cyber tracking-widest rounded-xl transition cursor-not-allowed";
+
+            if (!state.selectedP1) {
+                banner.innerText = "PLAYER 1 (WASD): CHOOSE YOUR ANIME FIGHTER";
+                banner.className = "w-full bg-red-950/40 border border-red-800/60 text-red-300 px-4 py-2 rounded-lg text-sm font-bold font-cyber mb-6 animate-pulse";
+            } else if ((state.currentMode === '2P' || state.currentMode === '3P' || state.currentMode === '2V2') && !state.selectedP2) {
+                banner.innerText = "PLAYER 2 (ARROWS): CHOOSE YOUR ANIME FIGHTER";
+                banner.className = "w-full bg-blue-950/40 border border-blue-800/60 text-blue-300 px-4 py-2 rounded-lg text-sm font-bold font-cyber mb-6 animate-pulse";
+            } else {
+                banner.innerText = "ROSTER SECURED. WARP ENGINES INITIALIZED.";
+                banner.className = "w-full bg-green-950/40 border border-green-800/60 text-green-300 px-4 py-2 rounded-lg text-sm font-bold font-cyber mb-6";
+                lockButton.disabled = false;
+                lockButton.className = "px-10 py-4 bg-gradient-to-r from-red-600 to-yellow-500 text-black font-black font-cyber tracking-widest rounded-xl transition transform hover:scale-105 cursor-pointer shadow-lg shadow-red-600/30";
+            }
+        }
+
+        // DOM Builder for Roster Grid
+        function buildCharacterSelectorGrid() {
+            const grid = document.getElementById('character-selection-grid');
+            grid.innerHTML = '';
+
+            CHAR_ROSTER.forEach(char => {
+                const isUnlocked = state.unlockedChars.includes(char.id);
+                const isSelectedP1 = state.selectedP1 && state.selectedP1.id === char.id;
+                const isSelectedP2 = state.selectedP2 && state.selectedP2.id === char.id;
+
+                let stateBorder = "border-gray-800 bg-gray-950";
+                if (isSelectedP1) stateBorder = "neon-border bg-red-950/20";
+                if (isSelectedP2) stateBorder = "neon-border-blue bg-blue-950/20";
+
+                const card = document.createElement('div');
+                card.className = `p-4 border rounded-xl flex flex-col justify-between transition transform relative ${stateBorder} ${isUnlocked ? 'hover:scale-[1.02] cursor-pointer' : 'opacity-40'}`;
+                
+                // Click behavior only allowed if profile token is unlocked
+                if (isUnlocked) {
+                    card.onclick = () => selectCharacterAction(char);
+                }
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-xs font-mono uppercase px-2 py-0.5 rounded bg-gray-900 text-gray-400 border border-gray-800">${char.anime}</span>
+                            <h4 class="text-lg font-bold font-cyber mt-1.5 text-white">${char.name}</h4>
+                        </div>
+                        <span class="text-2xl">${char.emoji}</span>
+                    </div>
+                    <div class="mt-4 pt-2 border-t border-gray-900/60 flex justify-between items-center text-xs text-gray-400">
+                        <span>HP: ${char.baseHp}</span>
+                        <span>SPD: ${char.speed}</span>
+                    </div>
+                    ${!isUnlocked ? `<div class="absolute inset-0 bg-black/60 rounded-xl flex items-center justify-center font-cyber font-black text-yellow-500 tracking-wider text-sm">🔒 SHOP LOCK</div>` : ''}
+                    ${isSelectedP1 ? `<div class="absolute -top-2 -left-2 bg-red-500 text-black font-black font-cyber text-[10px] px-2 py-0.5 rounded shadow-lg">P1 ACT</div>` : ''}
+                    ${isSelectedP2 ? `<div class="absolute -top-2 -right-2 bg-blue-500 text-black font-black font-cyber text-[10px] px-2 py-0.5 rounded shadow-lg">P2 ACT</div>` : ''}
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Selection Engine FSM routing logic
+        function selectCharacterAction(char) {
+            if (!state.selectedP1) {
+                state.selectedP1 = char;
+            } else if ((state.currentMode === '2P' || state.currentMode === '3P' || state.currentMode === '2V2') && !state.selectedP2) {
+                state.selectedP2 = char;
+            } else {
+                // If everything filled, rewrite selection loop
+                state.selectedP1 = char;
+                state.selectedP2 = null;
+            }
+            evaluateSelectionPromptState();
+            buildCharacterSelectorGrid();
+        }
+
+        // Shop Interface Management Engine
+        function buildShopCardsDom() {
+            const container = document.getElementById('shop-items-grid');
+            container.innerHTML = '';
+
+            CHAR_ROSTER.forEach(char => {
+                const isUnlocked = state.unlockedChars.includes(char.id);
+                const card = document.createElement('div');
+                card.className = "bg-gray-900 border border-gray-800 rounded-xl p-4 flex flex-col justify-between hover:border-gray-700 transition";
+
+                let actionButtonHtml = '';
+                if (isUnlocked) {
+                    actionButtonHtml = `<button disabled class="w-full py-2 bg-gray-800 text-gray-500 font-bold rounded-lg text-xs font-cyber tracking-widest uppercase">SUMMONED & UNLOCKED</button>`;
+                } else {
+                    const canAfford = state.coins >= char.cost;
+                    actionButtonHtml = `
+                        <button onclick="attemptPurchaseCharacter('${char.id}', ${char.cost})" class="w-full py-2.5 ${canAfford ? 'bg-yellow-500 text-black hover:bg-yellow-400' : 'bg-gray-800 text-gray-500 cursor-not-allowed'} font-black rounded-lg text-sm font-cyber tracking-wider transition">
+                            SUMMON FOR 🪙 ${char.cost}
+                        </button>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <span class="text-[10px] text-yellow-400 font-mono tracking-widest uppercase bg-yellow-950/40 px-2 py-0.5 rounded border border-yellow-900/30">${char.anime}</span>
+                            <h3 class="text-xl font-black font-cyber text-white mt-1">${char.name}</h3>
+                        </div>
+                        <div class="text-3xl p-1 bg-gray-950 rounded-xl border border-gray-800">${char.emoji}</div>
+                    </div>
+                    <div class="bg-gray-950 p-2.5 rounded-lg border border-gray-800 text-xs text-gray-400 space-y-1 mb-4">
+                        <div><b>Burst Skill:</b> <span class="text-purple-400">${char.skill}</span></div>
+                        <div class="flex justify-between text-[11px] pt-1 border-t border-gray-900 text-gray-500">
+                            <span>Base Life HP: <b class="text-gray-300">${char.baseHp}</b></span>
+                            <span>Tactical Velocity: <b class="text-gray-300">${char.speed}</b></span>
+                        </div>
+                    </div>
+                    ${actionButtonHtml}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function attemptPurchaseCharacter(charId, cost) {
+            if (state.coins >= cost && !state.unlockedChars.includes(charId)) {
+                state.coins -= cost;
+                state.unlockedChars.push(charId);
+                saveProgressToStorage();
+                renderCoinCounters();
+                buildShopCardsDom();
+            }
+        }
+
+        function resetApplicationContext() {
+            document.getElementById('modal-victory').classList.add('hidden');
+            backToMenu();
+        }
+
+        // ==========================================
+        // CANVAS REALTIME COMBAT GAME SYSTEM ENGINE
+        // ==========================================
+
+        function handleCanvasRescale() {
+            const wrapper = canvas.parentElement;
+            if (!wrapper) return;
+            const w = wrapper.clientWidth;
+            const h = wrapper.clientHeight;
+            
+            // Map dimensions maintaining custom aspect canvas matrix
+            canvas.width = Math.min(w, arenaWidth);
+            canvas.height = Math.min(h, arenaHeight);
+        }
+
+        function setupKeyboardListeners() {
+            window.addEventListener('keydown', (e) => {
+                keysPressed[e.key.toLowerCase()] = true;
+                
+                // Trigger non-spam immediate triggers (attacks)
+                if (gameActive) {
+                    handleActionKeydownTriggers(e.key.toLowerCase());
+                }
+            });
+            window.addEventListener('keyup', (e) => {
+                keysPressed[e.key.toLowerCase()] = false;
+            });
+        }
+
+        function handleActionKeydownTriggers(key) {
+            // Player 1 Trigger mapping
+            if (players[0] && !players[0].isBot && players[0].hp > 0) {
+                if (key === 'f') fireMeleeStrike(players[0]);
+                if (key === 'g') spawnSignatureProjectile(players[0]);
+            }
+            // Player 2 Trigger mapping
+            const p2Index = (state.currentMode === '2P' || state.currentMode === '3P' || state.currentMode === '2V2') ? 1 : -1;
+            if (p2Index !== -1 && players[p2Index] && !players[p2Index].isBot && players[p2Index].hp > 0) {
+                if (key === 'l') fireMeleeStrike(players[p2Index]);
+                if (key === 'k') spawnSignatureProjectile(players[p2Index]);
+            }
+        }
+
+        function initiateBattlefield() {
+            document.getElementById('screen-select').classList.add('hidden');
+            document.getElementById('screen-battle').classList.remove('hidden');
+
+            handleCanvasRescale();
+            
+            // Clear match memory structures
+            players = [];
+            projectiles = [];
+            particles = [];
+            matchCoinsEarned = 0;
+            
+            // Construct Arena Entities dependent on selected format mode matrix
+            assembleMatchLobbyFighters();
+
+            // Set layout HUD initial parameters
+            document.getElementById('hud-p1-name').innerText = players[0].template.name.toUpperCase();
+            document.getElementById('hud-p1-hp').style.width = '100%';
+            
+            const hudP2Card = document.getElementById('hud-p2-card');
+            if (state.currentMode === '2P' || state.currentMode === '3P' || state.currentMode === '2V2') {
+                hudP2Card.classList.remove('hidden');
+                document.getElementById('hud-p2-name').innerText = players[1].template.name.toUpperCase();
+                document.getElementById('hud-p2-hp').style.width = '100%';
+            } else {
+                hudP2Card.classList.add('hidden');
+            }
+
+            updateAliveHudTicker();
+            
+            // Activate loops
+            gameActive = true;
+            gameLoopId = requestAnimationFrame(arenaGameTickLoop);
+            logBattleTicker("ALL COMBATANTS DROPPED INTO THE ZONE. ENGAGE.");
+        }
+
+        function assembleMatchLobbyFighters() {
+            // Helper function to return random template (EXCLUDING the broken character)
+            const getRandomTemplate = () => {
+                const botPool = CHAR_ROSTER.filter(c => c.id !== 'beginning_end');
+                return botPool[Math.floor(Math.random() * botPool.length)];
+            };
+
+            // Spawn Position offsets
+            const spawnPoints = [
+                { x: 100, y: 150 }, { x: 750, y: 400 },
+                { x: 750, y: 150 }, { x: 100, y: 400 },
+                { x: 425, y: 80 },  { x: 425, y: 450 },
+                { x: 80, y: 275 },  { x: 820, y: 275 }
+            ];
+
+            // Player 1 Construction
+            players.push(createEntityInstance(state.selectedP1, spawnPoints[0].x, spawnPoints[0].y, false, 1, "P1"));
+
+            if (state.currentMode === '1P') {
+                // 1 Local Human vs 1 AI Bot
+                players.push(createEntityInstance(getRandomTemplate(), spawnPoints[1].x, spawnPoints[1].y, true, 2, "BOT Alpha"));
+            } 
+            else if (state.currentMode === '2P') {
+                // 1 Local Human vs 1 Local Human
+                players.push(createEntityInstance(state.selectedP2, spawnPoints[1].x, spawnPoints[1].y, false, 2, "P2"));
+            }
+            else if (state.currentMode === '3P') {
+                // 2 Local Humans vs 1 Ultra Bot
+                players.push(createEntityInstance(state.selectedP2, spawnPoints[1].x, spawnPoints[1].y, false, 2, "P2"));
+                let ultraBot = createEntityInstance(getRandomTemplate(), spawnPoints[2].x, spawnPoints[2].y, true, 3, "BOSS OMEGA");
+                ultraBot.hp = 250; // Boss buff
+                ultraBot.maxHp = 250;
+                players.push(ultraBot);
+            }
+            else if (state.currentMode === '2V2') {
+                // Team A: P1 + Bot, Team B: P2 + Bot
+                players.push(createEntityInstance(state.selectedP2, spawnPoints[1].x, spawnPoints[1].y, false, 2, "P2")); // Team B leader
+                // Add Team A Bot partner
+                players.push(createEntityInstance(getRandomTemplate(), spawnPoints[2].x, spawnPoints[2].y, true, 1, "BOT A2"));
+                // Add Team B Bot partner
+                players.push(createEntityInstance(getRandomTemplate(), spawnPoints[3].x, spawnPoints[3].y, true, 2, "BOT B2"));
+            }
+            else if (state.currentMode === 'FFA') {
+                // 8 Fighters All Out Chaos Arena Brawl (P1 + 7 Bots)
+                for (let i = 1; i < 8; i++) {
+                    players.push(createEntityInstance(getRandomTemplate(), spawnPoints[i].x, spawnPoints[i].y, true, i + 1, `BOT #${i}`));
+                }
+            }
+        }
+
+        function createEntityInstance(template, startX, startY, isBot, team, displayName) {
+            return {
+                template: { ...template },
+                x: startX,
+                y: startY,
+                radius: 24,
+                angle: Math.random() * Math.PI * 2,
+                hp: template.baseHp,
+                maxHp: template.baseHp,
+                speed: template.speed,
+                isBot: isBot,
+                team: team, // Decides targeting architecture parameters
+                displayName: displayName,
+                cooldowns: { projectile: 0, melee: 0 },
+                score: 0,
+                lastFiredDir: { x: 1, y: 0 } // Projectile tracking axis
+            };
+        }
+
+        function logBattleTicker(msg) {
+            document.getElementById('battle-ticker').innerText = msg;
+        }
+
+        function updateAliveHudTicker() {
+            const alive = players.filter(p => p.hp > 0).length;
+            document.getElementById('hud-alive-count').innerText = alive;
+        }
+
+        function terminateBattlefieldLoop() {
+            gameActive = false;
+            if (gameLoopId) cancelAnimationFrame(gameLoopId);
+        }
+
+        // Main Engine Canvas Realtime Frame Step loop
+        function arenaGameTickLoop() {
+            if (!gameActive) return;
+
+            // Clear Frame Buffer
+            ctx.fillStyle = '#090d16';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw decorative combat background tech lines
+            drawBackgroundGridDecoration();
+
+            // Run Tick processing routines
+            processEntitiesUpdates();
+            processProjectilesUpdates();
+            processParticlesUpdates();
+
+            // Collision check processing loops
+            resolveArenaBoundariesCollisions();
+            evaluateHitRegistrationCollisions();
+
+            // Rendering operations pass
+            renderProjectiles();
+            renderEntities();
+            renderParticles();
+
+            // Scan end condition flags parameters
+            evaluateMatchResolutionState();
+
+            if (gameActive) {
+                gameLoopId = requestAnimationFrame(arenaGameTickLoop);
+            }
+        }
+
+        function drawBackgroundGridDecoration() {
+            ctx.strokeStyle = 'rgba(31, 41, 55, 0.3)';
+            ctx.lineWidth = 1;
+            const gridSpacing = 40;
+            
+            for (let x = 0; x < canvas.width; x += gridSpacing) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += gridSpacing) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+            }
+
+            // Central nexus ring marker
+            ctx.strokeStyle = 'rgba(239, 68, 68, 0.08)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, canvas.height / 2, 120, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+        // Update player positional structures based on keyboard keysPressed maps
+        function processEntitiesUpdates() {
+            players.forEach((p, idx) => {
+                if (p.hp <= 0) return;
+
+                // Process internal skill processing timers loops
+                if (p.cooldowns.projectile > 0) p.cooldowns.projectile--;
+                if (p.cooldowns.melee > 0) p.cooldowns.melee--;
+
+                if (!p.isBot) {
+                    // HUMAN MOVEMENT LOOPS LOGIC MATCH
+                    let mx = 0;
+                    let my = 0;
+
+                    if (idx === 0) {
+                        // Player 1 mapping context inputs
+                        if (keysPressed['w']) my = -1;
+                        if (keysPressed['s']) my = 1;
+                        if (keysPressed['a']) mx = -1;
+                        if (keysPressed['d']) mx = 1;
+                    } else if (idx === 1 && (state.currentMode === '2P' || state.currentMode === '3P' || state.currentMode === '2V2')) {
+                        // Player 2 mapping inputs
+                        if (keysPressed['arrowup']) my = -1;
+                        if (keysPressed['arrowdown']) my = 1;
+                        if (keysPressed['arrowleft']) mx = -1;
+                        if (keysPressed['arrowright']) mx = 1;
+                    }
+
+                    // Apply directional calculations vectors
+                    if (mx !== 0 || my !== 0) {
+                        const len = Math.sqrt(mx*mx + my*my);
+                        p.x += (mx / len) * p.speed;
+                        p.y += (my / len) * p.speed;
+                        p.angle = Math.atan2(my, mx);
+                        p.lastFiredDir = { x: mx / len, y: my / len };
+                    }
+                } else {
+                    // INTELLIGENT AI AGGRESSIVE BOT FSM ENGINE ROUTINE
+                    executeArtificialIntelligenceLogic(p);
+                }
+            });
+        }
+
+        function executeArtificialIntelligenceLogic(bot) {
+            // Target tracking array search loop configuration (Find nearest living opponent of alternate team structure)
+            let nearestEnemy = null;
+            let minDist = Infinity;
+
+            players.forEach(target => {
+                if (target.hp <= 0 || target === bot) return;
+                // Ignore teammates if team match running parameters active
+                if (state.currentMode === '2V2' && target.team === bot.team) return;
+
+                const dist = Math.hypot(target.x - bot.x, target.y - bot.y);
+                if (dist < minDist) {
+                    minDist = dist;
+                    nearestEnemy = target;
+                }
+            });
+
+            if (nearestEnemy) {
+                // Compute vector to enemy target coordinates profile
+                const dx = nearestEnemy.x - bot.x;
+                const dy = nearestEnemy.y - bot.y;
+                const angleToTarget = Math.atan2(dy, dx);
+                bot.angle = angleToTarget;
+                
+                // Track vector orientations memory records
+                bot.lastFiredDir = { x: Math.cos(angleToTarget), y: Math.sin(angleToTarget) };
+
+                // Handle proximity distance movement states
+                if (minDist > 70) {
+                    // Approach target location vector range coordinates
+                    bot.x += Math.cos(angleToTarget) * bot.speed * 0.85;
+                    bot.y += Math.sin(angleToTarget) * bot.speed * 0.85;
+                }
+
+                // Core execution conditional matrices checks
+                if (minDist <= 85 && bot.cooldowns.melee === 0) {
+                    fireMeleeStrike(bot);
+                } else if (minDist > 120 && minDist < 350 && bot.cooldowns.projectile === 0 && Math.random() < 0.03) {
+                    spawnSignatureProjectile(bot);
+                }
+            }
+        }
+
+        function fireMeleeStrike(f) {
+            if (f.cooldowns.melee > 0) return;
+            f.cooldowns.melee = 20; // reset weapon frames step ticks
+
+            // Spawn immediate visual arc swipe particle burst indicators
+            createParticleExplosion(f.x + f.lastFiredDir.x * 30, f.y + f.lastFiredDir.y * 30, f.template.color, 8);
+
+            // Conditional damage verification: God character 1-shots, bots deal slightly reduced damage (-2.0)
+            const finalDamage = f.template.id === 'beginning_end' ? 9999 : (f.isBot ? 13 : 15);
+
+            // Evaluate splash radial check inside vector sweep distance parameters
+            players.forEach(target => {
+                if (target.hp <= 0 || target === f) return;
+                if (state.currentMode === '2V2' && target.team === f.team) return;
+
+                const d = Math.hypot(target.x - (f.x + f.lastFiredDir.x * 30), target.y - (f.y + f.lastFiredDir.y * 30));
+                if (d <= target.radius + 20) {
+                    // Registered hit contact damage profile execution logic
+                    dealDamageToTarget(target, finalDamage, f);
+                }
+            });
+        }
+
+        function spawnSignatureProjectile(f) {
+            if (f.cooldowns.projectile > 0) return;
+            f.cooldowns.projectile = f.template.id === 'beginning_end' ? 10 : 65; // Ultra low cooldown for god character
+
+            // Conditional damage verification: God character 1-shots, bots deal slightly reduced damage (-2.0)
+            const finalDamage = f.template.id === 'beginning_end' ? 9999 : (f.isBot ? 26 : 28);
+
+            projectiles.push({
+                x: f.x + f.lastFiredDir.x * 25,
+                y: f.y + f.lastFiredDir.y * 25,
+                vx: f.lastFiredDir.x * 8.5,
+                vy: f.lastFiredDir.y * 8.5,
+                radius: f.template.id === 'beginning_end' ? 20 : 10, // Larger visual blast field
+                color: f.template.specialColor,
+                owner: f,
+                damage: finalDamage,
+                skillName: f.template.skill
+            });
+
+            // Log event string updates dynamically
+            if (!f.isBot || Math.random() < 0.2) {
+                logBattleTicker(`${f.displayName} Activated [ ${f.template.skill.toUpperCase()} ] !`);
+            }
+        }
+
+        function processProjectilesUpdates() {
+            projectiles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+            });
+
+            // Filter context indices leaving valid parameters frames array bounds
+            projectiles = projectiles.filter(p => (
+                p.x >= -50 && p.x <= canvas.width + 50 &&
+                p.y >= -50 && p.y <= canvas.height + 50
+            ));
+        }
+
+        function processParticlesUpdates() {
+            particles.forEach(pt => {
+                pt.x += pt.vx;
+                pt.y += pt.vy;
+                pt.life--;
+                pt.alpha = pt.life / pt.maxLife;
+            });
+            particles = particles.filter(pt => pt.life > 0);
+        }
+
+        function resolveArenaBoundariesCollisions() {
+            players.forEach(p => {
+                if (p.hp <= 0) return;
+                if (p.x - p.radius < 0) p.x = p.radius;
+                if (p.x + p.radius > canvas.width) p.x = canvas.width - p.radius;
+                if (p.y - p.radius < 0) p.y = p.radius;
+                if (p.y + p.radius > canvas.height) p.y = canvas.height - p.radius;
+            });
+        }
+
+        function evaluateHitRegistrationCollisions() {
+            for (let i = projectiles.length - 1; i >= 0; i--) {
+                const pr = projectiles[i];
+                let hitRegistered = false;
+
+                for (let j = 0; j < players.length; j++) {
+                    const pl = players[j];
+                    if (pl.hp <= 0 || pl === pr.owner) continue;
+                    if (state.currentMode === '2V2' && pl.team === pr.owner.team) continue;
+
+                    const distance = Math.hypot(pl.x - pr.x, pl.y - pr.y);
+                    if (distance <= pl.radius + pr.radius) {
+                        // Impact executed successfully
+                        dealDamageToTarget(pl, pr.damage, pr.owner);
+                        hitRegistered = true;
+                        break;
+                    }
+                }
+
+                if (hitRegistered) {
+                    projectiles.splice(i, 1);
+                }
+            }
+        }
+
+        function dealDamageToTarget(target, amount, attacker) {
+            target.hp -= amount;
+            if (target.hp < 0) target.hp = 0;
+
+            // Generate combat hit reaction feedback burst tokens
+            createParticleExplosion(target.x, target.y, '#ffffff', 5);
+            createParticleExplosion(target.x, target.y, target.template.color, 12);
+
+            // Manage live updates interface tracking
+            if (players[0] === target) {
+                const percentage = (target.hp / target.maxHp) * 100;
+                document.getElementById('hud-p1-hp').style.width = `${percentage}%`;
+            }
+            if (players[1] === target && (state.currentMode === '2P' || state.currentMode === '3P' || state.currentMode === '2V2')) {
+                const percentage = (target.hp / target.maxHp) * 100;
+                document.getElementById('hud-p2-hp').style.width = `${percentage}%`;
+            }
+
+            // Death execution routine trigger checks
+            if (target.hp === 0) {
+                createParticleExplosion(target.x, target.y, '#ef4444', 35);
+                attacker.score += 1;
+                
+                // Reward token allocations calculation criteria rules metrics
+                if (!attacker.isBot) {
+                    matchCoinsEarned += 60; // Tokens earned on kill achievement
+                }
+                
+                logBattleTicker(`${target.displayName} WAS ABSOLUTELY ELIMINATED BY ${attacker.displayName}!`);
+                updateAliveHudTicker();
+            }
+        }
+
+        function createParticleExplosion(x, y, color, count) {
+            for (let i = 0; i < count; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 1.5 + Math.random() * 4;
+                const life = 15 + Math.floor(Math.random() * 25);
+                particles.push({
+                    x: x, y: y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    color: color,
+                    life: life,
+                    maxLife: life,
+                    alpha: 1,
+                    size: 2 + Math.random() * 4
+                });
+            }
+        }
+
+        // Rendering engines matrix definitions loops
+        function renderEntities() {
+            players.forEach((p, idx) => {
+                if (p.hp <= 0) return;
+
+                // Draw power aura ring base
+                ctx.save();
+                ctx.shadowBlur = p.template.id === 'beginning_end' ? 25 : 15;
+                ctx.shadowColor = p.template.color;
+                ctx.strokeStyle = p.template.color;
+                ctx.lineWidth = p.template.id === 'beginning_end' ? 4 : 2;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius + 2, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+
+                // Draw Core Character sphere token shape
+                ctx.fillStyle = '#111827';
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = idx === 0 ? '#ef4444' : (idx === 1 && !p.isBot ? '#3b82f6' : '#4b5563');
+                ctx.stroke();
+
+                // Render Graphic Avatar identifier inside body boundary
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '18px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(p.template.emoji, p.x, p.y);
+
+                // Directional vision sight cursor pointer arrow indicator
+                ctx.fillStyle = p.template.color;
+                ctx.beginPath();
+                ctx.arc(p.x + Math.cos(p.angle) * (p.radius + 6), p.y + Math.sin(p.angle) * (p.radius + 6), 4, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Overhead text and minimal metrics bars rendering
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+                ctx.font = 'bold 11px Orbitron, sans-serif';
+                ctx.fillText(p.displayName, p.x, p.y - p.radius - 16);
+
+                // Small relative mini life gauge tracking system
+                const hpPercent = p.hp / p.maxHp;
+                ctx.fillStyle = '#374151';
+                ctx.fillRect(p.x - 20, p.y - p.radius - 8, 40, 4);
+                ctx.fillStyle = hpPercent > 0.4 ? '#10b981' : '#ef4444';
+                ctx.fillRect(p.x - 20, p.y - p.radius - 8, 40 * hpPercent, 4);
+            });
+        }
+
+        function renderProjectiles() {
+            projectiles.forEach(p => {
+                ctx.save();
+                ctx.shadowBlur = p.damage > 100 ? 30 : 18;
+                ctx.shadowColor = p.color;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+        }
+
+        function renderParticles() {
+            particles.forEach(pt => {
+                ctx.save();
+                ctx.globalAlpha = pt.alpha;
+                ctx.fillStyle = pt.color;
+                ctx.beginPath();
+                ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+        }
+
+        // Evaluate victory matrix states parameters tracking rules configurations
+        function evaluateMatchResolutionState() {
+            const alivePlayers = players.filter(p => p.hp > 0);
+            
+            // Check terminal flags condition states loops
+            let matchOver = false;
+            let winnerText = "VICTORY";
+            let reasonText = "You stood strongest inside the active brawler arena loop.";
+
+            if (state.currentMode === '1P') {
+                if (players[0].hp <= 0) {
+                    matchOver = true;
+                    winnerText = "DEFEATED";
+                    reasonText = "The AI Bot successfully overwhelmed your operational matrix frames.";
+                } else if (players[1].hp <= 0) {
+                    matchOver = true;
+                    matchCoinsEarned += 100; // Solo Match win prize currency
+                    winnerText = "VICTORY";
+                }
+            } 
+            else if (state.currentMode === '2P') {
+                if (players[0].hp <= 0) {
+                    matchOver = true;
+                    winnerText = "PLAYER 2 DOMINATES";
+                    reasonText = "Player 1 base structure shattered in local combat operations.";
+                } else if (players[1].hp <= 0) {
+                    matchOver = true;
+                    winnerText = "PLAYER 1 DOMINATES";
+                    reasonText = "Player 2 base structure shattered in local combat operations.";
+                }
+            }
+            else if (state.currentMode === '3P') {
+                const boss = players[2];
+                if (players[0].hp <= 0 && players[1].hp <= 0) {
+                    matchOver = true;
+                    winnerText = "BOSS VICTORY";
+                    reasonText = "Omega AI Bot crushed all human local operations forces.";
+                } else if (boss.hp <= 0) {
+                    matchOver = true;
+                    matchCoinsEarned += 150; // High value challenge reward tier tokens
+                    winnerText = "HUMANS WIN";
+                    reasonText = "Tactical coordination successfully purged the Omega Threat.";
+                }
+            }
+            else if (state.currentMode === '2V2') {
+                // Team 1: index 0 and 2. Team 2: index 1 and 3.
+                const t1Alive = (players[0].hp > 0) || (players[2] && players[2].hp > 0);
+                const t2Alive = (players[1].hp > 0) || (players[3] && players[3].hp > 0);
+
+                if (!t1Alive) {
+                    matchOver = true;
+                    winnerText = "TEAM B WINS";
+                    reasonText = "All operational components of Team A dismantled.";
+                } else if (!t2Alive) {
+                    matchOver = true;
+                    matchCoinsEarned += 120;
+                    winnerText = "TEAM A WINS";
+                    reasonText = "All operational components of Team B dismantled.";
+                }
+            }
+            else if (state.currentMode === 'FFA') {
+                if (players[0].hp <= 0) {
+                    matchOver = true;
+                    winnerText = "ELIMINATED";
+                    reasonText = "You did not survive the 8-player structural chaos lobby format.";
+                } else if (alivePlayers.length === 1 && alivePlayers[0] === players[0]) {
+                    matchOver = true;
+                    matchCoinsEarned += 250; // Top tier survival prize allocation coins tokens
+                    winnerText = "THE STRONGEST WINNER";
+                    reasonText = "Absolute champion. You survived against 7 enemy brawler bots.";
+                }
+            }
+
+            if (matchOver) {
+                executeMatchTerminationSequence(winnerText, reasonText);
+            }
+        }
+
+        function executeMatchTerminationSequence(headline, reasoning) {
+            terminateBattlefieldLoop();
+            
+            // Commit structural balance alterations safely tracking calculations metrics
+            state.coins += matchCoinsEarned;
+            saveProgressToStorageStorage();
+            renderCoinCounters();
+
+            // Populate summary graphics components UI text deck overlays elements
+            document.getElementById('victory-headline').innerText = headline;
+            document.getElementById('victory-reason').innerText = reasoning;
+            document.getElementById('victory-reward-coins').innerText = matchCoinsEarned;
+
+            // Trigger modal display system parameters visible
+            document.getElementById('modal-victory').classList.remove('hidden');
+        }
+
+    </script>
+</body>
+</html>
