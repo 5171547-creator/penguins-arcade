@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anthony's Big Back Burger Adventure</title>
+    <style>
+        :root {
+            --primary: #f39c12;
+            --primary-hover: #e67e22;
+            --bg-dark: #1e120b;
+            --bg-light: #3a1c06;
+            --accent: #e74c3c;
+            --text: #fff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark), var(--bg-light));
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding: 10px;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 600px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 4px solid var(--primary);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8), 0 0 20px rgba(243, 156, 18, 0.2);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Screen Switcher Layout */
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px;
+            text-align: center;
+            min-height: 400px;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: #ddd;
+            line-height: 1.5;
+        }
+
+        /* UI Elements */
+        .btn {
+            background: linear-gradient(180deg, var(--primary), var(--primary-hover));
+            color: #000;
+            font-weight: bold;
+            font-size: 1.2rem;
+            padding: 14px 35px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);
+            transition: transform 0.1s, box-shadow 0.1s;
+            text-transform: uppercase;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+            box-shadow: 0 2px 5px rgba(243, 156, 18, 0.2);
+        }
+
+        /* Game Header Dashboard */
+        #game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border-bottom: 2px solid rgba(243, 156, 18, 0.3);
+        }
+
+        .hud-item {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .hud-item span {
+            color: var(--primary);
+            font-size: 1.3rem;
+        }
+
+        /* Progress Bar */
+        #meter-container {
+            width: 100%;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .meter-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #status-text {
+            color: var(--primary);
+        }
+
+        .meter-bg {
+            width: 100%;
+            height: 20px;
+            background: #222;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #444;
+        }
+
+        .meter-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #f1c40f, #e67e22, #e74c3c);
+            transition: width 0.2s ease-out;
+            box-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
+        }
+
+        /* Game Area */
+        #canvas-wrapper {
+            width: 100%;
+            position: relative;
+            background: #111;
+            cursor: crosshair;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        /* Controls Instructions */
+        .instructions-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            max-width: 450px;
+            text-align: left;
+        }
+
+        .instructions-card ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .instructions-card li {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            font-size: 0.95rem;
+        }
+
+        .instructions-card li::before {
+            content: "🍔";
+            margin-right: 10px;
+        }
+
+        .instructions-card li.bad::before {
+            content: "🥗";
+        }
+
+        /* Custom Modal Box (No native alerts) */
+        #custom-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: rgba(41, 128, 185, 0.95);
+            border: 3px solid #fff;
+            padding: 20px;
+            border-radius: 15px;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.3s, opacity 0.3s;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        #custom-message.show {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen active">
+            <h1>Big Back Anthony</h1>
+            <p>Help Anthony reach his ultimate form by devouring every burger in sight!</p>
+            
+            <div class="instructions-card">
+                <ul>
+                    <li>Move using <strong>WASD / Arrow Keys</strong> or simply <strong>Tap/Click & Hold</strong> where you want Anthony to run.</li>
+                    <li>Eat Burgers (🍔) to grow larger and fill your Big Back Meter.</li>
+                    <li class="bad">Avoid the Salad Storms (🥗) — they shrink Anthony and ruin his gains!</li>
+                </ul>
+            </div>
+
+            <button class="btn" id="start-btn">Start Eating</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen" style="padding: 0;">
+            <div id="game-header" style="width: 100%;">
+                <div class="hud-item">Burgers: <span id="burger-count">0</span></div>
+                <div class="hud-item">Size Level: <span id="size-level">1</span></div>
+            </div>
+
+            <div id="meter-container">
+                <div class="meter-label">
+                    <span>Big Back Progress</span>
+                    <span id="status-text">Hungry...</span>
+                </div>
+                <div class="meter-bg">
+                    <div id="meter-fill" class="meter-fill"></div>
+                </div>
+            </div>
+
+            <div id="canvas-wrapper">
+                <canvas id="gameCanvas"></canvas>
+                <div id="custom-message">Level Up!</div>
+            </div>
+        </div>
+
+        <!-- Game Over / Win Screen -->
+        <div id="game-over-screen" class="screen">
+            <h1 id="end-title">Ultimate Big Back Achieved!</h1>
+            <p id="end-body">Anthony is now an absolute unit. He successfully conquered the burger mountain!</p>
+            <div style="margin-bottom: 25px; font-size: 1.2rem;">
+                Total Burgers Eaten: <strong id="end-burgers" style="color: var(--primary);">0</strong>
+            </div>
+            <button class="btn" id="restart-btn">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Setup Audio Synthesizer (Web Audio API) ---
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (!audioCtx) return;
+            
+            // Resume context if suspended
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'eat') {
+                // Happy arpeggio tone for burger
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.15);
+            } else if (type === 'salad') {
+                // Low sad tone for salad
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(90, audioCtx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.25);
+            } else if (type === 'win') {
+                // Victory Fanfare
+                const now = audioCtx.currentTime;
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                notes.forEach((freq, index) => {
+                    const o = audioCtx.createOscillator();
+                    const g = audioCtx.createGain();
+                    o.type = 'triangle';
+                    o.frequency.setValueAtTime(freq, now + index * 0.1);
+                    g.gain.setValueAtTime(0.15, now + index * 0.1);
+                    g.gain.exponentialRampToValueAtTime(0.001, now + index * 0.1 + 0.2);
+                    o.connect(g);
+                    g.connect(audioCtx.destination);
+                    o.start(now + index * 0.1);
+                    o.stop(now + index * 0.1 + 0.2);
+                });
+            }
+        }
+
+        // --- Game Framework ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const wrapper = document.getElementById('canvas-wrapper');
+
+        // Screens
+        const startScreen = document.getElementById('start-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+
+        // HUD elements
+        const burgerCountEl = document.getElementById('burger-count');
+        const sizeLevelEl = document.getElementById('size-level');
+        const meterFillEl = document.getElementById('meter-fill');
+        const statusTextEl = document.getElementById('status-text');
+        const messageModal = document.getElementById('custom-message');
+
+        // Control variables
+        let keys = {};
+        let pointer = { x: null, y: null, active: false };
+
+        // Game State
+        let gameActive = false;
+        let burgersEaten = 0;
+        let progress = 0; // 0 to 100
+        let currentMilestone = 1;
+
+        // Entities
+        let anthony = {
+            x: 100,
+            y: 100,
+            baseRadius: 18,
+            currentScale: 1.0,
+            speed: 4.5,
+            emoji: '👦',
+            facingRight: true
+        };
+
+        let items = []; // Holds burgers and salads
+
+        // Floating Text Effects
+        let particles = [];
+
+        // --- Core Sizing Logic ---
+        function resizeCanvas() {
+            const width = wrapper.clientWidth;
+            // Establish a flexible height baseline based on aspect ratio
+            const height = Math.min(width * 0.7, window.innerHeight * 0.55);
+            canvas.width = width;
+            canvas.height = height;
+        }
+
+        window.addEventListener('resize', () => {
+            if (gameActive) {
+                resizeCanvas();
+            }
+        });
+
+        // --- Input Event Listeners ---
+        window.addEventListener('keydown', (e) => { keys[e.key.toLowerCase()] = true; });
+        window.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
+
+        // Unified Pointer Event Handler
+        function updatePointerPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            pointer.x = clientX - rect.left;
+            pointer.y = clientY - rect.top;
+        }
+
+        wrapper.addEventListener('mousedown', (e) => {
+            pointer.active = true;
+            updatePointerPos(e);
+        });
+        wrapper.addEventListener('mousemove', (e) => {
+            if (pointer.active) updatePointerPos(e);
+        });
+        window.addEventListener('mouseup', () => { pointer.active = false; });
+
+        wrapper.addEventListener('touchstart', (e) => {
+            pointer.active = true;
+            updatePointerPos(e);
+        }, { passive: true });
+        wrapper.addEventListener('touchmove', (e) => {
+            if (pointer.active) updatePointerPos(e);
+        }, { passive: true });
+        wrapper.addEventListener('touchend', () => { pointer.active = false; });
+
+        // --- State/UI Management Helper ---
+        function triggerModal(txt) {
+            messageModal.innerText = txt;
+            messageModal.classList.add('show');
+            setTimeout(() => {
+                messageModal.classList.remove('show');
+            }, 1000);
+        }
+
+        function updateStatusLabel() {
+            if (progress < 25) {
+                statusTextEl.innerText = "Hungry Appetizer Mode";
+                anthony.emoji = '👦';
+            } else if (progress < 50) {
+                statusTextEl.innerText = "Burger Connoisseur";
+                anthony.emoji = '👨';
+            } else if (progress < 75) {
+                statusTextEl.innerText = "Certified Big Back";
+                anthony.emoji = '🫄';
+            } else {
+                statusTextEl.innerText = "Absolute Unit Status";
+                anthony.emoji = '🦍';
+            }
+            
+            sizeLevelEl.innerText = currentMilestone;
+            burgerCountEl.innerText = burgersEaten;
+            meterFillEl.style.width = `${progress}%`;
+        }
+
+        // --- Game Actions & Spawn Logic ---
+        function spawnItem(type) {
+            const size = type === 'burger' ? 24 : 22;
+            const buffer = 40;
+            const newItem = {
+                type: type,
+                x: buffer + Math.random() * (canvas.width - buffer * 2),
+                y: buffer + Math.random() * (canvas.height - buffer * 2),
+                size: size,
+                emoji: type === 'burger' ? '🍔' : '🥗',
+                vx: type === 'salad' ? (Math.random() - 0.5) * 3 : 0,
+                vy: type === 'salad' ? (Math.random() - 0.5) * 3 : 0
+            };
+            items.push(newItem);
+        }
+
+        function createEffect(x, y, text, color) {
+            particles.push({
+                x: x,
+                y: y,
+                text: text,
+                color: color,
+                alpha: 1.0,
+                life: 60
+            });
+        }
+
+        function initGame() {
+            burgersEaten = 0;
+            progress = 0;
+            currentMilestone = 1;
+            anthony.currentScale = 1.0;
+            anthony.x = canvas.width / 2;
+            anthony.y = canvas.height / 2;
+            items = [];
+            particles = [];
+            
+            // Spawn initial inventory
+            for(let i=0; i<4; i++) spawnItem('burger');
+            for(let i=0; i<2; i++) spawnItem('salad');
+
+            updateStatusLabel();
+        }
+
+        // --- Core Loop Mechanics ---
+        function update() {
+            if (!gameActive) return;
+
+            // Compute actual visual radius based on scale updates
+            let anthonyRadius = anthony.baseRadius * anthony.currentScale;
+
+            // Character Position Processing (Keyboard vs Pointer tracking input alternatives)
+            let moved = false;
+            let dx = 0;
+            let dy = 0;
+
+            if (keys['arrowup'] || keys['w']) { dy -= 1; moved = true; }
+            if (keys['arrowdown'] || keys['s']) { dy += 1; moved = true; }
+            if (keys['arrowleft'] || keys['a']) { dx -= 1; moved = true; anthony.facingRight = false; }
+            if (keys['arrowright'] || keys['d']) { dx += 1; moved = true; anthony.facingRight = true; }
+
+            if (moved) {
+                // Normalize vector
+                let length = Math.sqrt(dx * dx + dy * dy);
+                anthony.x += (dx / length) * anthony.speed;
+                anthony.y += (dy / length) * anthony.speed;
+            } else if (pointer.active && pointer.x !== null) {
+                // Glide towards tap/click targets seamlessly
+                let pdx = pointer.x - anthony.x;
+                let pdy = pointer.y - anthony.y;
+                let pDist = Math.sqrt(pdx * pdx + pdy * pdy);
+                
+                if (pDist > 6) {
+                    anthony.x += (pdx / pDist) * anthony.speed;
+                    anthony.y += (pdy / pDist) * anthony.speed;
+                    anthony.facingRight = pdx > 0;
+                }
+            }
+
+            // Boundary Lock Keep safe inside viewport frames
+            anthony.x = Math.max(anthonyRadius, Math.min(canvas.width - anthonyRadius, anthony.x));
+            anthony.y = Math.max(anthonyRadius, Math.min(canvas.height - anthonyRadius, anthony.y));
+
+            // Elements movement & Collision evaluation check
+            for (let i = items.length - 1; i >= 0; i--) {
+                let item = items[i];
+
+                // Propagate physics for salad obstacles
+                if (item.type === 'salad') {
+                    item.x += item.vx;
+                    item.y += item.vy;
+
+                    // Bounce vectors off boundary margins
+                    if (item.x - item.size/2 < 0 || item.x + item.size/2 > canvas.width) item.vx *= -1;
+                    if (item.y - item.size/2 < 0 || item.y + item.size/2 > canvas.height) item.vy *= -1;
+                }
+
+                // Distance threshold calculation
+                let cdx = anthony.x - item.x;
+                let cdy = anthony.y - item.y;
+                let distance = Math.sqrt(cdx * cdx + cdy * cdy);
+
+                if (distance < anthonyRadius + item.size / 2) {
+                    // Item Consumption Consequence Router
+                    if (item.type === 'burger') {
+                        burgersEaten++;
+                        progress += 8;
+                        anthony.currentScale += 0.08;
+                        createEffect(item.x, item.y, "+8% BIG BACK", "#f1c40f");
+                        playSound('eat');
+                        
+                        // Milestone Progress Trigger Tracking Check
+                        if (progress >= currentMilestone * 25 && currentMilestone < 4) {
+                            currentMilestone++;
+                            triggerModal(`Level ${currentMilestone}: Gaining Mass!`);
+                        }
+
+                        // Remove and recycle assets
+                        items.splice(i, 1);
+                        spawnItem('burger');
+                        
+                        // Escalate difficulty thresholds by dynamically injecting salads
+                        if (burgersEaten % 5 === 0) {
+                            spawnItem('salad');
+                        }
+                    } else if (item.type === 'salad') {
+                        // Healthy components penalty impacts configuration
+                        progress = Math.max(0, progress - 10);
+                        anthony.currentScale = Math.max(1.0, anthony.currentScale - 0.1);
+                        createEffect(item.x, item.y, "-10% LOSS!", "#2ecc71");
+                        playSound('salad');
+                        
+                        // Reverse level tracking index configurations
+                        if (progress < (currentMilestone - 1) * 25 && currentMilestone > 1) {
+                            currentMilestone--;
+                        }
+
+                        items.splice(i, 1);
+                        spawnItem('salad');
+                    }
+
+                    // Check victory constraints condition
+                    if (progress >= 100) {
+                        progress = 100;
+                        updateStatusLabel();
+                        endGame(true);
+                        return;
+                    }
+
+                    updateStatusLabel();
+                }
+            }
+
+            // Decay particles timelines
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.y -= 0.6;
+                p.life--;
+                p.alpha = p.life / 60;
+                if (p.life <= 0) particles.splice(i, 1);
+            }
+        }
+
+        function render() {
+            // Draw baseline canvas screen architecture clears
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Render active scene objects
+            items.forEach(item => {
+                ctx.font = `${item.size}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(item.emoji, item.x, item.y);
+            });
+
+            // Render Anthony the main hero
+            let currentSize = anthony.baseRadius * 2 * anthony.currentScale;
+            ctx.font = `${currentSize}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            ctx.save();
+            ctx.translate(anthony.x, anthony.y);
+            // Flip emoji rendering depending on vector orientation tracking horizontal paths
+            if (!anthony.facingRight) {
+                ctx.scale(-1, 1);
+            }
+            ctx.fillText(anthony.emoji, 0, 0);
+            ctx.restore();
+
+            // Render pop up text alerts inside canvas engine layers
+            particles.forEach(p => {
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.font = 'bold 14px system-ui';
+                ctx.fillStyle = p.color;
+                ctx.textAlign = 'center';
+                ctx.fillText(p.text, p.x, p.y);
+                ctx.restore();
+            });
+        }
+
+        function gameLoop() {
+            if (!gameActive) return;
+            update();
+            render();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function endGame(won) {
+            gameActive = false;
+            playSound('win');
+            
+            startScreen.classList.remove('active');
+            gameScreen.classList.remove('active');
+            gameOverScreen.classList.add('active');
+
+            const endTitle = document.getElementById('end-title');
+            const endBody = document.getElementById('end-body');
+            document.getElementById('end-burgers').innerText = burgersEaten;
+
+            if (won) {
+                endTitle.innerText = "Ultimate Big Back Achieved! 👑";
+                endBody.innerText = "Anthony is now an absolute unit. He out-ate the entire salad storm and claimed his burger throne!";
+            }
+        }
+
+        // --- Screen Switching Management Triggers ---
+        document.getElementById('start-btn').addEventListener('click', () => {
+            initAudio();
+            startScreen.classList.remove('active');
+            gameOverScreen.classList.remove('active');
+            gameScreen.classList.add('active');
+            
+            resizeCanvas();
+            gameActive = true;
+            initGame();
+            requestAnimationFrame(gameLoop);
+        });
+
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            gameOverScreen.classList.remove('active');
+            gameScreen.classList.add('active');
+            
+            resizeCanvas();
+            gameActive = true;
+            initGame();
+            requestAnimationFrame(gameLoop);
+        });
+    </script>
+</body>
+</html>
