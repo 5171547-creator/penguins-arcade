@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Greyson's Great Escape</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background-color: #0f172a;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding: 15px;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 850px;
+            background: #1e293b;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 10px;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            color: #38bdf8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        header p {
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+
+        .stats-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            background: #0f172a;
+            padding: 12px;
+            border-radius: 8px;
+            justify-content: space-between;
+        }
+
+        .stat-group {
+            flex: 1;
+            min-width: 140px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #cbd5e1;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .bar-container {
+            width: 100%;
+            height: 16px;
+            background: #334155;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        #healthBar {
+            background: linear-gradient(90deg, #ef4444, #f43f5e);
+        }
+
+        #cleanBar {
+            background: linear-gradient(90deg, #06b6d4, #0ea5e9);
+        }
+
+        .badge {
+            background: #a855f7;
+            color: white;
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: none;
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { opacity: 0.6; }
+            to { opacity: 1; }
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 3px solid #475569;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .log-box {
+            background: #0f172a;
+            border-left: 4px solid #38bdf8;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            min-height: 42px;
+            color: #e2e8f0;
+            font-style: italic;
+        }
+
+        /* Mobile Controls Styling */
+        .controls-panel {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 5px;
+            gap: 40px;
+        }
+
+        .dpad {
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            grid-template-rows: repeat(3, 60px);
+            gap: 6px;
+        }
+
+        .dbtn {
+            background: #334155;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px #1e293b;
+            cursor: pointer;
+        }
+
+        .dbtn:active {
+            background: #475569;
+            transform: translateY(3px);
+            box-shadow: 0 1px #1e293b;
+        }
+
+        .dbtn.empty {
+            background: transparent;
+            box-shadow: none;
+            cursor: default;
+            pointer-events: none;
+        }
+
+        .legend-panel {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Game Over / Win Modal Custom Setup */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: #1e293b;
+            border: 3px solid #38bdf8;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+
+        .modal-content h2 {
+            font-size: 1.8rem;
+            margin-bottom: 12px;
+            color: #38bdf8;
+            text-transform: uppercase;
+        }
+
+        .modal-content p {
+            font-size: 0.95rem;
+            color: #cbd5e1;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .modal-btn {
+            background: #0ea5e9;
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 4px #0369a1;
+            transition: all 0.1s ease;
+        }
+
+        .modal-btn:hover {
+            background: #38bdf8;
+        }
+
+        .modal-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px #0369a1;
+        }
+
+        @media(max-width: 600px) {
+            header h1 { font-size: 1.4rem; }
+            .controls-panel { gap: 15px; }
+            .dpad { grid-template-columns: repeat(3, 50px); grid-template-rows: repeat(3, 50px); }
+            .dbtn { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <header>
+            <h1>Greyson's Room Escape</h1>
+            <p>Move slowly, stay out of the sun beams, get clean, and find the exit!</p>
+        </header>
+
+        <div class="stats-panel">
+            <div class="stat-group">
+                <div class="stat-label">
+                    <span>Stamina / Health 🩸</span>
+                    <span id="healthTxt">100%</span>
+                </div>
+                <div class="bar-container">
+                    <div id="healthBar" class="bar-fill" style="width: 100%;"></div>
+                </div>
+            </div>
+            <div class="stat-group">
+                <div class="stat-label">
+                    <span>Cleanliness 🧼</span>
+                    <span id="cleanTxt">0%</span>
+                </div>
+                <div class="bar-container">
+                    <div id="cleanBar" class="bar-fill" style="width: 0%;"></div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center;">
+                <span id="shieldIndicator" class="badge">SHIELDED</span>
+            </div>
+        </div>
+
+        <div class="canvas-wrapper" id="canvasContainer">
+            <canvas id="gameCanvas"></canvas>
+        </div>
+
+        <div id="messageBox" class="log-box">
+            Greyson: "My internet is down... I must leave the room. But I smell terrible and the outside light looks scary."
+        </div>
+
+        <!-- Touch Controls Interface -->
+        <div class="controls-panel">
+            <div class="dpad">
+                <button class="dbtn empty"></button>
+                <button class="dbtn" id="btnUp" data-dir="up">▲</button>
+                <button class="dbtn empty"></button>
+                <button class="dbtn" id="btnLeft" data-dir="left">◀</button>
+                <button class="dbtn empty"></button>
+                <button class="dbtn" id="btnRight" data-dir="right">▶</button>
+                <button class="dbtn empty"></button>
+                <button class="dbtn" id="btnDown" data-dir="down">▼</button>
+                <button class="dbtn empty"></button>
+            </div>
+        </div>
+
+        <div class="legend-panel">
+            <div class="legend-item"><span>🧔</span> Greyson</div>
+            <div class="legend-item"><span>📦</span> Trash Pile (Slows down)</div>
+            <div class="legend-item"><span>🚿</span> Shower Tile (Cleans/Hurts)</div>
+            <div class="legend-item"><span>☀️</span> Moving Sun Rays (Deadly)</div>
+            <div class="legend-item"><span>🧼</span> Luxury Soap (Shield + Clean)</div>
+            <div class="legend-item"><span>🧴</span> Spray (Stinky Nitro Speed)</div>
+            <div class="legend-item"><span>🍕</span> Floor Pizza (Heals)</div>
+            <div class="legend-item"><span>🚪</span> Exit Gate</div>
+        </div>
+    </div>
+
+    <!-- Interactive Screens / Overlays -->
+    <div id="screenModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Greyson's Trial</h2>
+            <p id="modalDesc">
+                Greyson hasn't left his room or showered in months. Because of his massive build, he moves very slowly. Help him find the hidden bathroom items, survive the water trial, dodge the lethal moving sunbeams, and escape into the world!
+            </p>
+            <button id="modalBtn" class="modal-btn">Start Game</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvasContainer');
+
+        // Fixed simulation resolution for uniform physics math
+        const V_WIDTH = 800;
+        const V_HEIGHT = 600;
+
+        const COLS = 16;
+        const ROWS = 12;
+        const CELL_SIZE = 50; // 16 * 50 = 800, 12 * 50 = 600
+
+        // Map definitions
+        // W = Wall, . = Floor, T = Trash (Slow floor), R = Shower space, B = Bathroom standard floor, E = Final exit
+        const grid = [
+            ['W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W'],
+            ['W','.','.','.','T','.','.','W','R','R','W','.','.','.','.','W'],
+            ['W','.','T','.','.','.','.','W','R','R','W','.','T','.','.','W'],
+            ['W','.','.','.','.','T','.','.','B','B','W','.','.','.','.','W'],
+            ['W','W','W','.','W','W','W','W','W','.','W','W','W','W','.','W'],
+            ['W','.','.','.','.','.','.','.','.','.','.','.','.','.','.','W'],
+            ['W','.','.','.','.','.','.','.','.','.','.','.','.','.','.','W'],
+            ['W','.','T','.','.','W','W','W','W','W','W','.','.','.','.','W'],
+            ['W','.','.','.','.','W','.','.','.','.','W','.','T','.','.','W'],
+            ['W','.','.','.','.','W','.','.','.','.','W','.','.','.','.','W'],
+            ['W','.','.','.','.','.','.','.','.','.','.','.','.','.','.','W'],
+            ['W','W','W','W','W','W','W','W','W','W','W','W','W','W','E','W']
+        ];
+
+        // Core Game state
+        let player = {
+            x: 80,
+            y: 80,
+            radius: 15,
+            health: 100,
+            cleanliness: 0,
+            speedBoostTimer: 0,
+            shieldTimer: 0
+        };
+
+        let items = [];
+        let sunbeams = [];
+        let keys = {};
+        let gameActive = false;
+        let isGameOver = false;
+        let messageLog = "";
+
+        // UI nodes
+        const healthBar = document.getElementById('healthBar');
+        const healthTxt = document.getElementById('healthTxt');
+        const cleanBar = document.getElementById('cleanBar');
+        const cleanTxt = document.getElementById('cleanTxt');
+        const shieldIndicator = document.getElementById('shieldIndicator');
+        const messageBox = document.getElementById('messageBox');
+        
+        const screenModal = document.getElementById('screenModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalDesc = document.getElementById('modalDesc');
+        const modalBtn = document.getElementById('modalBtn');
+
+        // Setup dynamic responsive dimensions
+        function resizeCanvas() {
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('load', resizeCanvas);
+        resizeCanvas();
+
+        // Game state initializer
+        function initGame() {
+            player.x = 85;
+            player.y = 85;
+            player.health = 100;
+            player.cleanliness = 0;
+            player.speedBoostTimer = 0;
+            player.shieldTimer = 0;
+
+            // Define items in map slots (centered inside cell boxes)
+            items = [
+                { x: 125, y: 125, type: 'pizza', emoji: '🍕', collected: false },
+                { x: 275, y: 75, type: 'soap', emoji: '🧼', collected: false },
+                { x: 525, y: 125, type: 'deodorant', emoji: '🧴', collected: false },
+                { x: 125, y: 425, type: 'pizza', emoji: '🍕', collected: false },
+                { x: 675, y: 475, type: 'soap', emoji: '🧼', collected: false },
+                { x: 525, y: 325, type: 'deodorant', emoji: '🧴', collected: false }
+            ];
+
+            // Define sunlight danger arrays
+            sunbeams = [
+                // Horizontal sweeping beam
+                { x: 150, y: 230, w: 110, h: 180, startX: 150, endX: 520, speed: 1.5, dir: 1, type: 'pingpong' },
+                // Vertical pulsating beam
+                { x: 600, y: 50, w: 130, h: 420, pulse: 0, dir: 1, type: 'pulse' }
+            ];
+
+            isGameOver = false;
+            gameActive = true;
+            setMessage("Objective: Collect soap items, enter the shower room (top-center grid), get 100% clean, then make it to the red bottom door!");
+        }
+
+        function setMessage(msg) {
+            if (messageLog !== msg) {
+                messageLog = msg;
+                messageBox.innerText = msg;
+            }
+        }
+
+        // Trigger item mechanics
+        function collectItem(item) {
+            if (item.type === 'pizza') {
+                player.health = Math.min(100, player.health + 30);
+                setMessage('Greyson: "Yes! A stale piece of pizza on the carpet. Healthy!" (+30 Health)');
+            } else if (item.type === 'soap') {
+                player.cleanliness = Math.min(100, player.cleanliness + 25);
+                player.shieldTimer = 240; // ~4 seconds immunity
+                setMessage('Greyson: "Bespoke hygiene soap bars! I feel a protective clean shield around me."');
+            } else if (item.type === 'deodorant') {
+                player.speedBoostTimer = 200; // Speed burst duration
+                setMessage('Greyson: "Body spray activated! Stinky maximum nitrous sprint speed engagement!"');
+            }
+        }
+
+        // Handle wall bounding volume collisions
+        function hitWall(x, y, r) {
+            let cellLeft = Math.floor((x - r) / CELL_SIZE);
+            let cellRight = Math.floor((x + r) / CELL_SIZE);
+            let cellTop = Math.floor((y - r) / CELL_SIZE);
+            let cellBottom = Math.floor((y + r) / CELL_SIZE);
+
+            if (cellLeft < 0 || cellRight >= COLS || cellTop < 0 || cellBottom >= ROWS) return true;
+
+            for (let c = cellLeft; c <= cellRight; c++) {
+                for (let r = cellTop; r <= cellBottom; r++) {
+                    if (grid[r][c] === 'W') return true;
+                }
+            }
+            return false;
+        }
+
+        // Simulation update loop
+        function updateLogic() {
+            if (!gameActive || isGameOver) return;
+
+            // Handle decrement timers
+            if (player.speedBoostTimer > 0) player.speedBoostTimer--;
+            if (player.shieldTimer > 0) player.shieldTimer--;
+
+            // Compute standard base speeds
+            let baseSpeed = 1.2; // Slow base speed due to profile description
+            if (player.speedBoostTimer > 0) baseSpeed *= 1.8;
+
+            // Identify current ground cell type context
+            let currCellX = Math.floor(player.x / CELL_SIZE);
+            let currCellY = Math.floor(player.y / CELL_SIZE);
+            
+            if (currCellX >= 0 && currCellX < COLS && currCellY >= 0 && currCellY < ROWS) {
+                let cellType = grid[currCellY][currCellX];
+                
+                // Trash pile penalty
+                if (cellType === 'T') {
+                    baseSpeed *= 0.5;
+                    if (Math.random() < 0.015) {
+                        setMessage('Greyson: "Trudging through these pizza boxes and dirty socks is exhausting..."');
+                    }
+                }
+                
+                // Shower cell rules
+                if (cellType === 'R') {
+                    if (player.cleanliness < 100) {
+                        player.cleanliness += 0.25;
+                        if (player.cleanliness > 100) player.cleanliness = 100;
+                        
+                        // Water burns skin unless shielded
+                        if (player.shieldTimer <= 0) {
+                            player.health -= 0.15;
+                        }
+                        setMessage('Greyson: "THE SHOWER WATER IS HITING ME! SO CLEAN BUT SO INFURIATING!"');
+                    } else {
+                        setMessage('Greyson: "I am absolutely glistening and fresh. Now I can face the outside world door!"');
+                    }
+                }
+
+                // Win check door tile intersection
+                if (cellType === 'E') {
+                    if (player.cleanliness >= 100) {
+                        triggerEndGame(true, "Greyson took an ultimate shower, navigated the harsh light paths, opened his apartment doors, and gloriously returned to physical society!");
+                        return;
+                    } else {
+                        setMessage('System: The main exit gate is sealed. You cannot enter public with a 0% hygiene score!');
+                        // Push player back away from map cell slightly
+                        player.y -= 4;
+                    }
+                }
+            }
+
+            // Keyboard/virtual button vector computations
+            let dx = 0;
+            let dy = 0;
+
+            if (keys['ArrowUp'] || keys['KeyW'] || keys['up']) dy = -baseSpeed;
+            if (keys['ArrowDown'] || keys['KeyS'] || keys['down']) dy = baseSpeed;
+            if (keys['ArrowLeft'] || keys['KeyA'] || keys['left']) dx = -baseSpeed;
+            if (keys['ArrowRight'] || keys['KeyD'] || keys['right']) dx = baseSpeed;
+
+            // X-Axis delta check
+            if (dx !== 0) {
+                player.x += dx;
+                if (hitWall(player.x, player.y, player.radius)) {
+                    player.x -= dx;
+                }
+            }
+            // Y-Axis delta check
+            if (dy !== 0) {
+                player.y += dy;
+                if (hitWall(player.x, player.y, player.radius)) {
+                    player.y -= dy;
+                }
+            }
+
+            // Animate hazardous sunlight paths
+            sunbeams.forEach(beam => {
+                if (beam.type === 'pingpong') {
+                    beam.x += beam.speed * beam.dir;
+                    if (beam.x > beam.endX || beam.x < beam.startX) {
+                        beam.dir *= -1;
+                    }
+                } else if (beam.type === 'pulse') {
+                    beam.pulse += 0.015 * beam.dir;
+                    if (beam.pulse > 1 || beam.pulse < 0) {
+                        beam.dir *= -1;
+                    }
+                }
+            });
+
+            // Sunlight danger checks
+            let insideSun = false;
+            sunbeams.forEach(beam => {
+                if (beam.type === 'pingpong') {
+                    if (player.x + player.radius > beam.x && player.x - player.radius < beam.x + beam.w &&
+                        player.y + player.radius > beam.y && player.y - player.radius < beam.y + beam.h) {
+                        insideSun = true;
+                    }
+                } else if (beam.type === 'pulse') {
+                    // Only active when visibility value passes critical threshold
+                    if (beam.pulse > 0.35) {
+                        if (player.x + player.radius > beam.x && player.x - player.radius < beam.x + beam.w &&
+                            player.y + player.radius > beam.y && player.y - player.radius < beam.y + beam.h) {
+                            insideSun = true;
+                        }
+                    }
+                }
+            });
+
+            if (insideSun && player.shieldTimer <= 0) {
+                player.health -= 0.5;
+                setMessage('Greyson: "AHHH! PURE SUNLIGHT BURNING MY ROOM! THE SOLAR RAYS ARE EVAPORATING MY ENERGY!"');
+            }
+
+            // Supply intersections loop
+            items.forEach(item => {
+                if (!item.collected) {
+                    let distance = Math.hypot(player.x - item.x, player.y - item.y);
+                    if (distance < player.radius + 14) {
+                        item.collected = true;
+                        collectItem(item);
+                    }
+                }
+            });
+
+            // Zero vitality game over check
+            if (player.health <= 0) {
+                player.health = 0;
+                triggerEndGame(false, "Greyson fainted from severe dehydration under hot sun beams or clean water exposure shock.");
+            }
+        }
+
+        // Render pass execution
+        function renderView() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.save();
+            // Scale uniform logic matrix dynamically onto active viewport
+            ctx.scale(canvas.width / V_WIDTH, canvas.height / V_HEIGHT);
+
+            // Draw game grid maps
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    let tile = grid[r][c];
+                    let xPos = c * CELL_SIZE;
+                    let yPos = r * CELL_SIZE;
+
+                    if (tile === 'W') {
+                        ctx.fillStyle = '#475569';
+                        ctx.fillRect(xPos, yPos, CELL_SIZE, CELL_SIZE);
+                        ctx.strokeStyle = '#334155';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(xPos, yPos, CELL_SIZE, CELL_SIZE);
+                    } else if (tile === 'R') {
+                        ctx.fillStyle = '#155e75';
+                        ctx.fillRect(xPos, yPos, CELL_SIZE, CELL_SIZE);
+                        
+                        // Falling shower droplets effect
+                        ctx.fillStyle = 'rgba(147, 197, 253, 0.4)';
+                        for(let i = 0; i < 2; i++) {
+                            let dropX = xPos + 10 + (i * 20) + (Math.random() * 8);
+                            ctx.fillRect(dropX, yPos + ((Date.now() / 4) % CELL_SIZE), 3, 8);
+                        }
+                    } else if (tile === 'B') {
+                        ctx.fillStyle = '#1e293b';
+                        ctx.fillRect(xPos, yPos, CELL_SIZE, CELL_SIZE);
+                    } else if (tile === 'T') {
+                        ctx.fillStyle = '#272522';
+                        ctx.fillRect(xPos, yPos, CELL_SIZE, CELL_SIZE);
+                        ctx.font = '16px sans-serif';
+                        ctx.fillText('📦', xPos + 15, yPos + 32);
+                    } else if (tile === 'E') {
+                        ctx.fillStyle = '#dc2626';
+                        ctx.fillRect(xPos, yPos, CELL_SIZE, CELL_SIZE);
+                        ctx.font = '18px sans-serif';
+                        ctx.fillText('🚪', xPos + 16, yPos + 32);
+                    } else {
+                        ctx.fillStyle = '#0f172a';
+                        ctx.fillRect(xPos, yPos, CELL_SIZE, CELL_SIZE);
+                    }
+                }
+            }
+
+            // Draw uncollected floor item icons
+            items.forEach(item => {
+                if (!item.collected) {
+                    ctx.font = '22px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(item.emoji, item.x, item.y);
+                }
+            });
+
+            // Draw hazardous luminous beams
+            sunbeams.forEach(beam => {
+                if (beam.type === 'pingpong') {
+                    let grad = ctx.createLinearGradient(beam.x, beam.y, beam.x, beam.y + beam.h);
+                    grad.addColorStop(0, 'rgba(253, 224, 71, 0.45)');
+                    grad.addColorStop(1, 'rgba(251, 191, 36, 0.1)');
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(beam.x, beam.y, beam.w, beam.h);
+                } else if (beam.type === 'pulse') {
+                    let alphaVal = 0.05 + (beam.pulse * 0.4);
+                    ctx.fillStyle = `rgba(253, 224, 71, ${alphaVal})`;
+                    ctx.fillRect(beam.x, beam.y, beam.w, beam.h);
+                }
+            });
+
+            // Draw Greyson avatar
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+            ctx.fillStyle = player.shieldTimer > 0 ? '#0ea5e9' : '#f43f5e';
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            // Custom face detailing inside player character circle
+            ctx.fillStyle = '#475569';
+            ctx.fillRect(player.x - 8, player.y - 5, 5, 3); // Left lens
+            ctx.fillRect(player.x + 3, player.y - 5, 5, 3); // Right lens
+            ctx.fillStyle = '#78350f'; 
+            ctx.fillRect(player.x - 9, player.y + 1, 18, 7); // Chud facial beard element
+
+            ctx.restore();
+        }
+
+        // Main animation driver
+        function gameIteration() {
+            updateLogic();
+            renderView();
+
+            // Update interactive DOM bars smoothly
+            healthBar.style.width = player.health + '%';
+            healthTxt.innerText = Math.round(player.health) + '%';
+            
+            cleanBar.style.width = player.cleanliness + '%';
+            cleanTxt.innerText = Math.round(player.cleanliness) + '%';
+
+            shieldIndicator.style.display = player.shieldTimer > 0 ? 'inline-block' : 'none';
+
+            requestAnimationFrame(gameIteration);
+        }
+
+        function triggerEndGame(won, message) {
+            isGameOver = true;
+            gameActive = false;
+            
+            modalTitle.innerText = won ? "Victory!" : "Game Over";
+            modalDesc.innerText = message;
+            modalBtn.innerText = "Play Again";
+            screenModal.style.display = 'flex';
+        }
+
+        // Global Event bindings
+        window.addEventListener('keydown', e => { keys[e.code] = true; });
+        window.addEventListener('keyup', e => { keys[e.code] = false; });
+
+        // Wire touch controller interface elements smoothly
+        const touchButtons = ['btnUp', 'btnDown', 'btnLeft', 'btnRight'];
+        const buttonDirs = { 'btnUp': 'up', 'btnDown': 'down', 'btnLeft': 'left', 'btnRight': 'right' };
+
+        touchButtons.forEach(btnId => {
+            const btnEl = document.getElementById(btnId);
+            const directionalKey = buttonDirs[btnId];
+
+            btnEl.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                keys[directionalKey] = true;
+            });
+            btnEl.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                keys[directionalKey] = false;
+            });
+            // Desktop mouse fallbacks for virtual elements
+            btnEl.addEventListener('mousedown', () => { keys[directionalKey] = true; });
+            btnEl.addEventListener('mouseup', () => { keys[directionalKey] = false; });
+            btnEl.addEventListener('mouseleave', () => { keys[directionalKey] = false; });
+        });
+
+        // Initialize user interaction trigger modal setup
+        modalBtn.addEventListener('click', () => {
+            screenModal.style.display = 'none';
+            initGame();
+        });
+
+        // Fire game frame iteration handlers immediately
+        requestAnimationFrame(gameIteration);
+    </script>
+</body>
+</html>
