@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vince to Prince: A Royal Quest</title>
+    <!-- Tailwind CSS (Whitelisted Domain) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts (Whitelisted Domain) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0b132b;
+        }
+        .royal-font {
+            font-family: 'Cinzel', serif;
+        }
+        .gold-glow {
+            box-shadow: 0 0 15px rgba(234, 179, 8, 0.3);
+        }
+        .gold-border {
+            border-color: rgba(234, 179, 8, 0.4);
+        }
+        /* Custom scrollbar for clean UI */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1c2541;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4a5568;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="text-gray-100 min-h-screen flex flex-col justify-between selection:bg-yellow-500 selection:text-black">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-[#1c2541] border-b-2 border-yellow-500/20 py-4 px-6 shadow-xl">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-yellow-500 text-slate-900 p-2 rounded-lg font-bold shadow-md animate-bounce">
+                    👑
+                </div>
+                <div>
+                    <h1 class="royal-font text-2xl font-extrabold text-yellow-400 tracking-wide">Vince to Prince</h1>
+                    <p class="text-xs text-gray-400 tracking-wider uppercase">The Official Royal Ascension Chronicles</p>
+                </div>
+            </div>
+            <!-- Custom Notification Banner inside UI (No alert() used) -->
+            <div id="game-toast" class="bg-slate-800 border border-yellow-500/30 text-yellow-300 text-xs px-4 py-2 rounded-full transition-all duration-300 opacity-0 transform translate-y-2 pointer-events-none">
+                Welcome, Vince! Start your royal trials.
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Game Window Container -->
+    <main class="flex-grow max-w-6xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left Column: Vince's Status & Profile Dashboard -->
+        <section class="bg-[#1c2541]/80 backdrop-blur rounded-2xl p-6 border border-slate-700/50 flex flex-col justify-between shadow-2xl h-fit lg:sticky lg:top-6">
+            <div>
+                
+                <div class="text-center pb-6 border-b border-slate-700/60">
+                    <div class="relative w-28 h-28 mx-auto mb-4 bg-gradient-to-tr from-amber-600 to-yellow-400 rounded-full p-1 shadow-lg gold-glow">
+                        <div class="bg-slate-900 w-full h-full rounded-full flex items-center justify-center text-4xl overflow-hidden relative">
+                            👦
+                            <div id="avatar-crown" class="absolute top-1 text-2xl transform -translate-y-4 opacity-0 transition-all duration-700">👑</div>
+                        </div>
+                    </div>
+                    <h2 class="royal-font text-2xl font-bold text-white" id="char-name">Vince</h2>
+                    <span id="char-title" class="inline-block mt-1 bg-slate-800 text-yellow-400 border border-yellow-500/30 text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full">
+                        Humble Commoner
+                    </span>
+                </div>
+
+                <!-- Live Tracked Stats Matrix -->
+                <div class="py-6 space-y-4">
+                    <h3 class="text-xs font-bold uppercase text-slate-400 tracking-widest mb-2">Royal Attributes</h3>
+                    
+                    <!-- Gold Currency Indicator -->
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/30 flex justify-between items-center">
+                        <span class="text-sm text-gray-300 flex items-center gap-2">💰 Royal Gold</span>
+                        <span id="stat-gold" class="royal-font text-xl font-bold text-amber-400">0</span>
+                    </div>
+
+                    <!-- Charm Progress Tracker -->
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/30">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm text-gray-300 flex items-center gap-2">✨ Etiquette & Charm</span>
+                            <span id="stat-charm text-purple-400" class="font-bold text-purple-400"><span id="val-charm">0</span>/250</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div id="bar-charm" class="bg-gradient-to-r from-purple-500 to-indigo-400 h-full w-0 transition-all duration-300"></div>
+                        </div>
+                    </div>
+
+                    <!-- Nobility Status / Court Favor Tracker -->
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/30">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm text-gray-300 flex items-center gap-2">⚔️ Court Favor</span>
+                            <span class="font-bold text-cyan-400"><span id="val-favor">0</span>/250</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div id="bar-favor" class="bg-gradient-to-r from-cyan-500 to-blue-400 h-full w-0 transition-all duration-300"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vince's Royal Attire Checklist -->
+                <div class="border-t border-slate-700/60 pt-4">
+                    <h3 class="text-xs font-bold uppercase text-slate-400 tracking-widest mb-3">Required Royal Regalia</h3>
+                    <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                        <div id="item-ring" class="p-2 rounded-xl bg-slate-900/40 border border-slate-800 text-gray-600 grayscale opacity-40 transition-all">
+                            <div class="text-xl mb-1">💍</div> Signet Ring
+                        </div>
+                        <div id="item-robe" class="p-2 rounded-xl bg-slate-900/40 border border-slate-800 text-gray-600 grayscale opacity-40 transition-all">
+                            <div class="text-xl mb-1">🧥</div> Royal Robe
+                        </div>
+                        <div id="item-crown" class="p-2 rounded-xl bg-slate-900/40 border border-slate-800 text-gray-600 grayscale opacity-40 transition-all">
+                            <div class="text-xl mb-1">👑</div> Golden Crown
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-slate-700/40 text-center text-xs text-slate-500">
+                Current Status: <span id="status-summary" class="text-gray-400">Not eligible for Coronation.</span>
+            </div>
+        </section>
+
+        <!-- Right Column (Spans 2 columns): Game Interaction Deck & Viewports -->
+        <section class="lg:col-span-2 flex flex-col gap-6">
+            
+            <!-- Game Section Navigation Tabs -->
+            <nav class="flex bg-[#1c2541] p-1.5 rounded-xl border border-slate-700/50 gap-2 shadow-inner">
+                <button onclick="switchTab('trial')" id="tab-btn-trial" class="flex-1 py-2.5 px-4 text-sm font-semibold rounded-lg transition-all text-center bg-gradient-to-r from-yellow-500 to-amber-500 text-slate-900 shadow-md">
+                    ⚔️ Royal Trials
+                </button>
+                <button onclick="switchTab('merchant')" id="tab-btn-merchant" class="flex-1 py-2.5 px-4 text-sm font-semibold rounded-lg transition-all text-center text-slate-400 hover:text-white hover:bg-slate-800">
+                    🏪 Royal Bazaar
+                </button>
+                <button onclick="switchTab('coronation')" id="tab-btn-coronation" class="flex-1 py-2.5 px-4 text-sm font-semibold rounded-lg transition-all text-center text-slate-400 hover:text-white hover:bg-slate-800">
+                    🏛️ Coronation Hall
+                </button>
+            </nav>
+
+            <!-- TAB 1: Arcade Game Window (Royal Trials) -->
+            <div id="tab-trial" class="tab-content block space-y-4">
+                <div class="bg-[#1c2541]/90 rounded-2xl p-4 sm:p-6 border border-slate-700/50 shadow-2xl relative">
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-4">
+                        <div>
+                            <h2 class="royal-font text-xl font-bold text-yellow-400">The Meadow of Royal Favors</h2>
+                            <p class="text-xs text-gray-400">Catch falling valuables to boost attributes, avoid mud or stones!</p>
+                        </div>
+                        <button id="start-btn" onclick="toggleGameLoop()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm px-6 py-2 rounded-xl transition-all shadow-md active:scale-95">
+                            Start Trial
+                        </button>
+                    </div>
+
+                    <!-- Interactive HTML5 Interactive Arcade Canvas -->
+                    <div class="relative bg-slate-950 rounded-xl overflow-hidden aspect-[16/9] border-2 border-slate-800 max-h-[380px]">
+                        <canvas id="gameCanvas" class="w-full h-full block bg-gradient-to-b from-sky-950 via-slate-900 to-emerald-950"></canvas>
+                        
+                        <!-- Overlay overlay screen for game states -->
+                        <div id="canvas-overlay" class="absolute inset-0 bg-slate-950/80 flex flex-col justify-center items-center text-center p-6 transition-all duration-300">
+                            <span class="text-4xl mb-3 animate-pulse">🌾</span>
+                            <h3 class="royal-font text-lg font-bold text-white mb-1">Vince is Ready</h3>
+                            <p class="text-xs text-gray-400 max-w-sm mb-4">Use your Left/Right Arrow keys or the mobile overlay touch pads below to maneuver Vince and catch items.</p>
+                            <div class="flex gap-4 text-xs bg-slate-900/90 border border-slate-800 p-3 rounded-lg text-left text-gray-300">
+                                <div>💰 <span class="text-amber-400 font-bold">Coin:</span> +15 Gold</div>
+                                <div>✨ <span class="text-purple-400 font-bold">Book:</span> +10 Charm</div>
+                                <div>⚔️ <span class="text-cyan-400 font-bold">Shield:</span> +10 Favor</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Touch/Mobile Alternative Controls (Responsive Adaptive Design constraint) -->
+                    <div class="flex justify-center gap-4 mt-4">
+                        <button id="btn-move-left" class="flex-1 max-w-[140px] bg-slate-800 hover:bg-slate-700 active:bg-slate-600 py-3 rounded-xl border border-slate-700 flex items-center justify-center select-none text-xl transition-all" title="Move Left">
+                            ⬅️
+                        </button>
+                        <button id="btn-move-right" class="flex-1 max-w-[140px] bg-slate-800 hover:bg-slate-700 active:bg-slate-600 py-3 rounded-xl border border-slate-700 flex items-center justify-center select-none text-xl transition-all" title="Move Right">
+                            ➡️
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: Royal Merchant Bazaar -->
+            <div id="tab-merchant" class="tab-content hidden space-y-4">
+                <div class="bg-[#1c2541]/90 rounded-2xl p-6 border border-slate-700/50 shadow-2xl">
+                    <h2 class="royal-font text-xl font-bold text-yellow-400 mb-2">The Royal Bazaar</h2>
+                    <p class="text-xs text-gray-400 mb-6">Acquire the mandatory heirloom pieces required by the high council to match the dignity of a royal prince.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Item Card 1: Signet Ring -->
+                        <div class="bg-slate-900/60 p-5 rounded-xl border border-slate-800 flex flex-col justify-between text-center transition-all hover:border-slate-700">
+                            <div>
+                                <span class="text-4xl block mb-2">💍</span>
+                                <h3 class="font-bold text-white text-base">Signet Ring</h3>
+                                <p class="text-xs text-gray-400 mt-1 mb-4">Proves noble heritage and authenticates royal decrees.</p>
+                            </div>
+                            <div>
+                                <div class="text-amber-400 font-bold text-sm mb-3">💰 150 Gold</div>
+                                <button id="buy-ring-btn" onclick="buyItem('ring', 150)" class="w-full bg-slate-800 hover:bg-yellow-500 hover:text-slate-950 font-bold text-xs py-2 px-3 rounded-lg transition-all border border-slate-700 text-yellow-400">
+                                    Purchase
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Item Card 2: Royal Robe -->
+                        <div class="bg-slate-900/60 p-5 rounded-xl border border-slate-800 flex flex-col justify-between text-center transition-all hover:border-slate-700">
+                            <div>
+                                <span class="text-4xl block mb-2">🧥</span>
+                                <h3 class="font-bold text-white text-base">Royal Robe</h3>
+                                <p class="text-xs text-gray-400 mt-1 mb-4">Woven from pure velvet silk dyed in majestic royal crimson.</p>
+                            </div>
+                            <div>
+                                <div class="text-amber-400 font-bold text-sm mb-3">💰 300 Gold</div>
+                                <button id="buy-robe-btn" onclick="buyItem('robe', 300)" class="w-full bg-slate-800 hover:bg-yellow-500 hover:text-slate-950 font-bold text-xs py-2 px-3 rounded-lg transition-all border border-slate-700 text-yellow-400">
+                                    Purchase
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Item Card 3: Golden Crown -->
+                        <div class="bg-slate-900/60 p-5 rounded-xl border border-slate-800 flex flex-col justify-between text-center transition-all hover:border-slate-700">
+                            <div>
+                                <span class="text-4xl block mb-2">👑</span>
+                                <h3 class="font-bold text-white text-base">Golden Crown</h3>
+                                <p class="text-xs text-gray-400 mt-1 mb-4">The ultimate declaration of supreme sovereign authority.</p>
+                            </div>
+                            <div>
+                                <div class="text-amber-400 font-bold text-sm mb-3">💰 500 Gold</div>
+                                <button id="buy-crown-btn" onclick="buyItem('crown', 500)" class="w-full bg-slate-800 hover:bg-yellow-500 hover:text-slate-950 font-bold text-xs py-2 px-3 rounded-lg transition-all border border-slate-700 text-yellow-400">
+                                    Purchase
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: Coronation Hall -->
+            <div id="tab-coronation" class="tab-content hidden space-y-4">
+                <div class="bg-[#1c2541]/90 rounded-2xl p-6 border border-slate-700/50 shadow-2xl text-center relative overflow-hidden">
+                    
+                    <!-- Separate celebration overlay inside the coronation hall block -->
+                    <div id="victory-screen" class="hidden absolute inset-0 bg-slate-950/95 flex flex-col justify-center items-center p-6 z-10 animate-fade-in">
+                        <span class="text-6xl mb-4 animate-bounce">✨👑👑✨</span>
+                        <h2 class="royal-font text-3xl font-extrabold text-yellow-400 tracking-wider">ALL HAIL PRINCE VINCE!</h2>
+                        <p class="text-sm text-gray-300 max-w-md mt-2 mb-6">You successfully guided Vince through the grueling trials, dressed him in fine garments, and achieved full nobility standing. The kingdom is saved!</p>
+                        <button onclick="restartGame()" class="bg-gradient-to-r from-yellow-500 to-amber-500 text-slate-950 font-extrabold text-xs px-8 py-3 rounded-full tracking-widest uppercase hover:brightness-110 shadow-lg active:scale-95 transition-all">
+                            Ascend Anew (Reset)
+                        </button>
+                    </div>
+
+                    <h2 class="royal-font text-2xl font-bold text-yellow-400 mb-2">The Coronation Altar</h2>
+                    <p class="text-xs text-gray-400 max-w-md mx-auto mb-8">Fulfill all sovereign requirements listed below to receive authorization for the supreme crowning event.</p>
+                    
+                    <!-- Checklist Checklist Validation UI -->
+                    <div class="max-w-md mx-auto space-y-3 text-left bg-slate-900/60 p-4 rounded-xl border border-slate-800/80 mb-8">
+                        <div class="flex justify-between items-center text-sm" id="chk-charm">
+                            <span>✨ Minimum 250 Etiquette Charm</span>
+                            <span class="font-bold text-red-400 text-xs">Incomplete</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm" id="chk-favor">
+                            <span>⚔️ Minimum 250 Court Favor</span>
+                            <span class="font-bold text-red-400 text-xs">Incomplete</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm" id="chk-regalia">
+                            <span>👑 Full 3-piece Royal Attire Secured</span>
+                            <span class="font-bold text-red-400 text-xs">Incomplete</span>
+                        </div>
+                    </div>
+
+                    <button id="coronate-btn" onclick="tryCoronation()" class="w-full max-w-sm bg-slate-800 text-gray-500 cursor-not-allowed font-bold text-base py-4 rounded-xl transition-all shadow-md border border-slate-700 tracking-wider">
+                        Initiate Royal Coronation
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Unified Footer bar -->
+    <footer class="bg-slate-950/80 border-t border-slate-800/60 py-3 text-center text-xs text-slate-500">
+        Vince to Prince Chronicles &copy; 2026. Built with HTML5 Canvas & Custom Interaction Layouts.
+    </footer>
+
+    <!-- Core Game Logic (State Engine & Canvas Renderer) -->
+    <script>
+        // Main Reactive State Matrix
+        let gameState = {
+            gold: 0,
+            charm: 0,
+            favor: 0,
+            title: 'Humble Commoner',
+            inventory: {
+                ring: false,
+                robe: false,
+                crown: false
+            },
+            gameActive: false
+        };
+
+        // Canvas Settings & System Framework Variables
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let player = {
+            x: 200,
+            y: 0,
+            width: 45,
+            height: 45,
+            speed: 8
+        };
+
+        let items = [];
+        let spawnTimer = 0;
+        let animationFrameId = null;
+
+        // Custom Key State Tracker
+        let keys = {
+            ArrowLeft: false,
+            ArrowRight: false
+        };
+
+        // Setup Responsive Scaling for Canvas
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth || 800;
+            canvas.height = canvas.parentElement.clientHeight || 350;
+            player.y = canvas.height - player.height - 15;
+            if(!gameState.gameActive) {
+                renderStaticBackground();
+            }
+        }
+
+        // Initialize Input Handlers & Framework Hooks on window load
+        window.onload = function() {
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            // Desktop Key Hookups
+            window.addEventListener('keydown', (e) => {
+                if(e.key in keys) keys[e.key] = true;
+            });
+            window.addEventListener('keyup', (e) => {
+                if(e.key in keys) keys[e.key] = false;
+            });
+
+            // Mobile/Touch Overlay Hookups (Adaptive input compatibility constraint)
+            setupTouchButton('btn-move-left', 'ArrowLeft');
+            setupTouchButton('btn-move-right', 'ArrowRight');
+
+            updateUI();
+        };
+
+        function setupTouchButton(elementId, keyName) {
+            const btn = document.getElementById(elementId);
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                keys[keyName] = true;
+            }, {passive: false});
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                keys[keyName] = false;
+            }, {passive: false});
+            btn.addEventListener('mousedown', () => keys[keyName] = true);
+            btn.addEventListener('mouseup', () => keys[keyName] = false);
+            btn.addEventListener('mouseleave', () => keys[keyName] = false);
+        }
+
+        // Toast Messages Router (No alert allowed constraint)
+        function showToast(message) {
+            const toast = document.getElementById('game-toast');
+            toast.innerText = message;
+            toast.classList.remove('opacity-0', 'translate-y-2');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-2');
+            }, 3000);
+        }
+
+        // UI Tabs Navigator Panel Switching Logic
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.className = "flex-1 py-2.5 px-4 text-sm font-semibold rounded-lg transition-all text-center text-slate-400 hover:text-white hover:bg-slate-800";
+            });
+
+            const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+            activeBtn.className = "flex-1 py-2.5 px-4 text-sm font-semibold rounded-lg transition-all text-center bg-gradient-to-r from-yellow-500 to-amber-500 text-slate-900 shadow-md";
+            
+            if(tabName !== 'trial' && gameState.gameActive) {
+                toggleGameLoop(); // Pause arcade action if leaving the canvas tab
+            }
+        }
+
+        // Refresh HTML Layout components with respect to current state
+        function updateUI() {
+            document.getElementById('stat-gold').innerText = gameState.gold;
+            document.getElementById('val-charm').innerText = gameState.charm;
+            document.getElementById('val-favor').innerText = gameState.favor;
+
+            // Constrain math values to max limits for bar renderings
+            document.getElementById('bar-charm').style.width = `${Math.min(100, (gameState.charm / 250) * 100)}%`;
+            document.getElementById('bar-favor').style.width = `${Math.min(100, (gameState.favor / 250) * 100)}%`;
+
+            // Titles Dynamic Progression logic
+            let currentPoints = gameState.charm + gameState.favor;
+            if (currentPoints >= 400 && gameState.inventory.crown && gameState.inventory.robe && gameState.inventory.ring) {
+                gameState.title = "Crown Prince Candidate";
+            } else if (currentPoints >= 300) {
+                gameState.title = "High Duke of the Realm";
+            } else if (currentPoints >= 180) {
+                gameState.title = "Honored Palace Knight";
+            } else if (currentPoints >= 80) {
+                gameState.title = "Royal Squire";
+            } else {
+                gameState.title = "Humble Commoner";
+            }
+            document.getElementById('char-title').innerText = gameState.title;
+
+            // Sync Inventory Items CSS properties
+            syncItemUI('ring', 'item-ring');
+            syncItemUI('robe', 'item-robe');
+            syncItemUI('crown', 'item-crown');
+
+            // Coronation Checklist Validation Check
+            const isCharmOk = gameState.charm >= 250;
+            const isFavorOk = gameState.favor >= 250;
+            const isRegaliaOk = gameState.inventory.ring && gameState.inventory.robe && gameState.inventory.crown;
+
+            updateChecklistItem('chk-charm', isCharmOk, `✨ Minimum 250 Etiquette Charm (${gameState.charm}/250)`);
+            updateChecklistItem('chk-favor', isFavorOk, `⚔️ Minimum 250 Court Favor (${gameState.favor}/250)`);
+            updateChecklistItem('chk-regalia', isRegaliaOk, isRegaliaOk ? "👑 Full 3-piece Royal Attire Secured" : "👑 Missing Royal Attire Pieces");
+
+            const coronateBtn = document.getElementById('coronate-btn');
+            if (isCharmOk && isFavorOk && isRegaliaOk) {
+                coronateBtn.className = "w-full max-w-sm bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-slate-900 font-extrabold text-base py-4 rounded-xl transition-all shadow-xl tracking-wider cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0";
+                document.getElementById('status-summary').innerHTML = "<span class='text-yellow-400 font-bold animate-pulse'>Ready for Coronation Ceremony!</span>";
+            } else {
+                coronateBtn.className = "w-full max-w-sm bg-slate-800 text-gray-500 cursor-not-allowed font-bold text-base py-4 rounded-xl transition-all shadow-md border border-slate-700 tracking-wider";
+                document.getElementById('status-summary').innerText = "Not eligible for Coronation.";
+            }
+        }
+
+        function syncItemUI(key, elementId) {
+            const el = document.getElementById(elementId);
+            const btn = document.getElementById(`buy-${key}-btn`);
+            if(gameState.inventory[key]) {
+                el.classList.remove('grayscale', 'opacity-40', 'bg-slate-900/40', 'border-slate-800');
+                el.classList.add('bg-amber-500/10', 'border-yellow-500/40', 'text-yellow-400', 'gold-glow');
+                if(btn) {
+                    btn.innerText = "Owned";
+                    btn.disabled = true;
+                    btn.className = "w-full bg-slate-950 text-slate-600 font-bold text-xs py-2 px-3 rounded-lg cursor-not-allowed border border-transparent";
+                }
+            } else {
+                el.className = "p-2 rounded-xl bg-slate-900/40 border border-slate-800 text-gray-600 grayscale opacity-40 transition-all";
+                if(btn) {
+                    btn.innerText = "Purchase";
+                    btn.disabled = false;
+                    btn.className = "w-full bg-slate-800 hover:bg-yellow-500 hover:text-slate-950 font-bold text-xs py-2 px-3 rounded-lg transition-all border border-slate-700 text-yellow-400";
+                }
+            }
+        }
+
+        function updateChecklistItem(id, isPassed, text) {
+            const el = document.getElementById(id);
+            if(isPassed) {
+                el.innerHTML = `<span>${text}</span> <span class="text-emerald-400 font-bold text-xs flex items-center gap-1">✔ Ready</span>`;
+            } else {
+                el.innerHTML = `<span>${text}</span> <span class="text-red-400 text-xs font-semibold">Incomplete</span>`;
+            }
+        }
+
+        // Commercial Shop Transaction Logic
+        function buyItem(itemKey, price) {
+            if(gameState.gold >= price) {
+                gameState.gold -= price;
+                gameState.inventory[itemKey] = true;
+                showToast(`Success! You bought the Royal ${itemKey.toUpperCase()}!`);
+                updateUI();
+            } else {
+                showToast("Insufficient gold! Complete more trials in the meadow.");
+            }
+        }
+
+        // Coronation End-Game Verification Routine
+        function tryCoronation() {
+            if(gameState.charm >= 250 && gameState.favor >= 250 && gameState.inventory.ring && gameState.inventory.robe && gameState.inventory.crown) {
+                document.getElementById('victory-screen').classList.remove('hidden');
+                document.getElementById('avatar-crown').classList.remove('opacity-0', '-translate-y-4');
+                document.getElementById('avatar-crown').classList.add('opacity-100', 'translate-y-0');
+                showToast("Coronation Complete! Long Live King Vince!");
+            }
+        }
+
+        function restartGame() {
+            gameState = {
+                gold: 0,
+                charm: 0,
+                favor: 0,
+                title: 'Humble Commoner',
+                inventory: { ring: false, robe: false, crown: false },
+                gameActive: false
+            };
+            document.getElementById('victory-screen').classList.add('hidden');
+            document.getElementById('avatar-crown').className = "absolute top-1 text-2xl transform -translate-y-4 opacity-0 transition-all duration-700";
+            items = [];
+            document.getElementById('canvas-overlay').classList.remove('opacity-0', 'pointer-events-none');
+            document.getElementById('start-btn').innerText = "Start Trial";
+            document.getElementById('start-btn').className = "w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm px-6 py-2 rounded-xl transition-all shadow-md";
+            switchTab('trial');
+            updateUI();
+        }
+
+        // ==========================================
+        // ARCADE INTERACTIVE CANVAS GAME LOOP LOGIC
+        // ==========================================
+        
+        function toggleGameLoop() {
+            const overlay = document.getElementById('canvas-overlay');
+            const startBtn = document.getElementById('start-btn');
+
+            if(!gameState.gameActive) {
+                // Engage Game Run Loop
+                gameState.gameActive = true;
+                overlay.classList.add('opacity-0', 'pointer-events-none');
+                startBtn.innerText = "Pause Trial";
+                startBtn.className = "w-full sm:w-auto bg-amber-600 hover:bg-amber-500 text-white font-bold text-sm px-6 py-2 rounded-xl transition-all shadow-md";
+                animationFrameId = requestAnimationFrame(gameLoop);
+            } else {
+                // Pause Engine Instance
+                gameState.gameActive = false;
+                overlay.classList.remove('opacity-0', 'pointer-events-none');
+                startBtn.innerText = "Resume Trial";
+                startBtn.className = "w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm px-6 py-2 rounded-xl transition-all shadow-md";
+                cancelAnimationFrame(animationFrameId);
+                renderStaticBackground();
+            }
+        }
+
+        function renderStaticBackground() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Quick stylized background render
+            ctx.fillStyle = "#1e293b";
+            ctx.font = "14px 'Plus Jakarta Sans'";
+            ctx.fillStyle = "#64748b";
+            ctx.textAlign = "center";
+            ctx.fillText("Game Paused / Session Inactive", canvas.width / 2, canvas.height / 2);
+        }
+
+        function spawnItem() {
+            const types = [
+                { emoji: '💰', color: '#fbbf24', value: 'gold', amt: 15 },
+                { emoji: '✨', color: '#c084fc', value: 'charm', amt: 10 },
+                { emoji: '⚔️', color: '#22d3ee', value: 'favor', amt: 10 },
+                { emoji: '🪨', color: '#94a3b8', value: 'mud', amt: -15 } // Hazard Obstacle element
+            ];
+            
+            // Random distribution leaning towards useful drops
+            let selectedType = types[Math.floor(Math.random() * types.length)];
+            if(selectedType.value === 'mud' && Math.random() > 0.45) {
+                selectedType = types[0]; // fallback down to coin drop rate
+            }
+
+            items.push({
+                x: Math.random() * (canvas.width - 30) + 10,
+                y: -30,
+                size: 26,
+                speed: Math.random() * 2.5 + 2,
+                meta: selectedType
+            });
+        }
+
+        function gameLoop() {
+            if(!gameState.gameActive) return;
+
+            // 1. Process Framework Coordinates and Movements
+            if (keys.ArrowLeft && player.x > 0) {
+                player.x -= player.speed;
+            }
+            if (keys.ArrowRight && player.x < canvas.width - player.width) {
+                player.x += player.speed;
+            }
+
+            // 2. Clear Screen Layer
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 3. Render Scenic Backdrop Floor elements
+            ctx.fillStyle = "rgba(16, 185, 129, 0.15)";
+            ctx.fillRect(0, canvas.height - 15, canvas.width, 15);
+
+            // 4. Update and Draw Vince Avatar Character model
+            ctx.font = `${player.height}px Arial`;
+            ctx.textAlign = "left";
+            ctx.textBaseline = "top";
+            ctx.fillText("👦", player.x, player.y);
+
+            // 5. Item Processing Engine Loop
+            spawnTimer++;
+            if(spawnTimer > 45) {
+                spawnItem();
+                spawnTimer = 0;
+            }
+
+            for(let i = items.length - 1; i >= 0; i--) {
+                let it = items[i];
+                it.y += it.speed;
+
+                // Render specific item icon
+                ctx.font = `${it.size}px Arial`;
+                ctx.fillText(it.meta.emoji, it.x, it.y);
+
+                // AABB standard collision check framework
+                if (
+                    it.x < player.x + player.width &&
+                    it.x + it.size > player.x &&
+                    it.y < player.y + player.height &&
+                    it.y + it.size > player.y
+                ) {
+                    // Trigger custom rewards/penalties logic safely
+                    if(it.meta.value === 'gold') gameState.gold += it.meta.amt;
+                    if(it.meta.value === 'charm') gameState.charm = Math.max(0, gameState.charm + it.meta.amt);
+                    if(it.meta.value === 'favor') gameState.favor = Math.max(0, gameState.favor + it.meta.amt);
+                    if(it.meta.value === 'mud') {
+                        gameState.gold = Math.max(0, gameState.gold + it.meta.amt);
+                        showToast("Ouch! Splashed by commoner mud! lost -15 Gold.");
+                    }
+
+                    items.splice(i, 1);
+                    updateUI();
+                    continue;
+                }
+
+                // Cull items passing bottom threshold safely
+                if(it.y > canvas.height) {
+                    items.splice(i, 1);
+                }
+            }
+
+            // Frame recursion loop hook
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+    </script>
+</body>
+</html>
