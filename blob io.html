@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blob Battlegrounds: IO Evolution Arena</title>
+    <style>
+        :root {
+            --bg-dark: #0a0c10;
+            --panel-bg: rgba(16, 22, 32, 0.85);
+            --border-glow: #38bdf8;
+            --gold: #fbbf24;
+            --iron: #94a3b8;
+            --xp: #22c55e;
+            --health: #ef4444;
+            --text-main: #f8fafc;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-dark);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-main);
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background-color: #0b0f19;
+        }
+
+        /* UI Overlays */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(5, 8, 15, 0.85);
+            z-index: 10;
+            backdrop-filter: blur(8px);
+            transition: opacity 0.3s ease;
+        }
+
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .menu-box {
+            background: var(--panel-bg);
+            border: 2px solid #1e293b;
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.15);
+            border-radius: 16px;
+            padding: 40px;
+            width: 90%;
+            max-width: 480px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 8px;
+            border: 2px solid #334155;
+            background: #0f172a;
+            color: #fff;
+            font-size: 1.1rem;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--border-glow);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+        }
+
+        .btn {
+            display: inline-block;
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(135deg, #38bdf8, #4f46e5);
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s, filter 0.2s;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn:hover {
+            filter: brightness(1.1);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        /* HUD Styles */
+        #hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+            display: grid;
+            grid-template-columns: 280px 1fr 240px;
+            grid-template-rows: auto 1fr auto;
+            padding: 20px;
+        }
+
+        #hud * {
+            pointer-events: auto;
+        }
+
+        /* Stats & Resources */
+        .hud-panel {
+            background: var(--panel-bg);
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 15px;
+            backdrop-filter: blur(4px);
+        }
+
+        .resources-panel {
+            grid-column: 1;
+            grid-row: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .stat-line {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        .icon-gold { background: #d97706; color: #fef08a; }
+        .icon-iron { background: #475569; color: #e2e8f0; }
+        .icon-level { background: #059669; color: #a7f3d0; }
+
+        /* Leaderboard */
+        .leaderboard-panel {
+            grid-column: 3;
+            grid-row: 1;
+        }
+
+        .leaderboard-panel h3 {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 4px;
+        }
+
+        .leaderboard-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 0.9rem;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            color: #cbd5e1;
+        }
+
+        .leaderboard-item.self {
+            color: var(--border-glow);
+            font-weight: bold;
+        }
+
+        /* Bottom Center XP & Health Bars */
+        .center-status {
+            grid-column: 2;
+            grid-row: 3;
+            justify-self: center;
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .bar-container {
+            width: 100%;
+            height: 20px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid #334155;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            width: 50%;
+            transition: width 0.1s ease;
+        }
+
+        #hp-fill { background: linear-gradient(90deg, #ef4444, #dc2626); width: 100%; }
+        #xp-fill { background: linear-gradient(90deg, #22c55e, #16a34a); width: 0%; }
+
+        .bar-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+        }
+
+        /* Upgrade System Panel */
+        .upgrades-panel {
+            grid-column: 1;
+            grid-row: 2 / 4;
+            align-self: end;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .upgrades-title {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #38bdf8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .upgrade-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(22, 30, 49, 0.9);
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 8px 12px;
+            gap: 10px;
+        }
+
+        .upgrade-info {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .upgrade-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .upgrade-cost {
+            font-size: 0.75rem;
+            color: var(--gold);
+            display: flex;
+            gap: 6px;
+        }
+
+        .upgrade-btn {
+            background: #38bdf8;
+            color: #0f172a;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .upgrade-btn:hover { background: #7dd3fc; }
+        .upgrade-btn:disabled {
+            background: #1e293b;
+            color: #64748b;
+            cursor: not-allowed;
+        }
+
+        /* Gun Evolution Selection Modal */
+        #evolution-popup {
+            position: absolute;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--panel-bg);
+            border: 2px solid var(--border-glow);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            gap: 15px;
+            z-index: 8;
+            pointer-events: auto;
+            backdrop-filter: blur(6px);
+        }
+
+        .evolution-card {
+            background: #1e293b;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            padding: 12px;
+            width: 130px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .evolution-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-glow);
+            background: #273549;
+        }
+
+        .evo-name { font-size: 0.9rem; font-weight: bold; margin-bottom: 4px; }
+        .evo-desc { font-size: 0.7rem; color: #94a3b8; line-height: 1.2; }
+
+        /* Message Log */
+        #kill-feed {
+            grid-column: 2;
+            grid-row: 1;
+            justify-self: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            max-height: 120px;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .feed-item {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            animation: fadeInOut 3s forwards;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-10px); }
+            10% { opacity: 1; transform: translateY(0); }
+            80% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(-10px); }
+        }
+
+        /* Controls Instructions Hint */
+        .controls-hint {
+            grid-column: 3;
+            grid-row: 3;
+            align-self: end;
+            text-align: right;
+            font-size: 0.8rem;
+            color: #64748b;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <!-- Main Menu / Start Screen -->
+    <div id="menu-overlay" class="overlay">
+        <div class="menu-box">
+            <h1>Blob Battlegrounds</h1>
+            <div class="subtitle">Eat resources, eliminate rivals, upgrade your guns</div>
+            <div class="input-group">
+                <input type="text" id="player-name-input" maxlength="14" value="PlayerBlob" placeholder="Enter Nickname">
+            </div>
+            <button class="btn" id="start-btn">Spawn into Arena</button>
+        </div>
+    </div>
+
+    <!-- Death / Game Over Screen -->
+    <div id="death-overlay" class="overlay hidden">
+        <div class="menu-box" style="border-color: var(--health); box-shadow: 0 0 30px rgba(239, 68, 68, 0.2);">
+            <h1 style="background: linear-gradient(135deg, #ef4444, #f97316);">Wasted</h1>
+            <div class="subtitle" id="death-reason">You were consumed by a rival arena master</div>
+            <div style="margin-bottom: 25px; display: flex; flex-direction: column; gap: 8px; text-align: left; background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #233149;">
+                <div style="display: flex; justify-content: space-between;"><span style="color: #64748b;">Level Reached:</span><span id="end-level" style="font-weight: bold; color: var(--xp);">1</span></div>
+                <div style="display: flex; justify-content: space-between;"><span style="color: #64748b;">Total Eliminations:</span><span id="end-kills" style="font-weight: bold; color: var(--health);">0</span></div>
+                <div style="display: flex; justify-content: space-between;"><span style="color: #64748b;">Gold Collected:</span><span id="end-gold" style="font-weight: bold; color: var(--gold);">0</span></div>
+            </div>
+            <button class="btn" id="respawn-btn">Respawn</button>
+        </div>
+    </div>
+
+    <!-- HUD Layout -->
+    <div id="hud">
+        <!-- Top Left Inventory / Stats -->
+        <div class="resources-panel hud-panel">
+            <div class="stat-line">
+                <div class="icon icon-level">L</div>
+                <div>Level <span id="hud-level">1</span></div>
+            </div>
+            <div class="stat-line">
+                <div class="icon icon-gold">$</div>
+                <div>Gold: <span id="hud-gold">0</span></div>
+            </div>
+            <div class="stat-line">
+                <div class="icon icon-iron">I</div>
+                <div>Iron: <span id="hud-iron">0</span></div>
+            </div>
+        </div>
+
+        <!-- Top Center Kill Feed -->
+        <div id="kill-feed"></div>
+
+        <!-- Top Right Leaderboard -->
+        <div class="leaderboard-panel hud-panel">
+            <h3>Leaderboard</h3>
+            <ul class="leaderboard-list" id="leaderboard-list">
+                <!-- Populated dynamically via JS -->
+            </ul>
+        </div>
+
+        <!-- Bottom Left Upgrade Dash -->
+        <div class="upgrades-panel" id="upgrades-container">
+            <div class="upgrades-title">
+                <span>Attribute Upgrades</span>
+                <span id="upgrade-points" style="color: var(--xp);"></span>
+            </div>
+            <!-- Dynamic upgrade item structures -->
+        </div>
+
+        <!-- Gun Evolution Popup Container -->
+        <div id="evolution-popup" style="display: none;"></div>
+
+        <!-- Bottom Center Health & Experience Progress Bars -->
+        <div class="center-status">
+            <div class="bar-container">
+                <div class="bar-fill" id="hp-fill"></div>
+                <div class="bar-label">HEALTH: <span id="hp-text">100/100</span></div>
+            </div>
+            <div class="bar-container">
+                <div class="bar-fill" id="xp-fill"></div>
+                <div class="bar-label">XP PROGRESS: <span id="xp-text">0/100</span></div>
+            </div>
+        </div>
+
+        <!-- Bottom Right Navigation Reminders -->
+        <div class="controls-hint">
+            Move: Mouse or WASD/Arrows<br>
+            Aim & Shoot: Cursor & Click / Space<br>
+            Upgrades: Click Dashboard Buttons
+        </div>
+    </div>
+
+    <!-- Rendering Context Element -->
+    <canvas id="arena"></canvas>
+</div>
+
+<script>
+    // Audio Context Strategy (Procedural audio synth generation)
+    const Sound = {
+        ctx: null,
+        init() {
+            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        },
+        playShoot() {
+            if (!this.ctx) return;
+            let osc = this.ctx.createOscillator();
+            let gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(400, this.ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(150, this.ctx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + 0.15);
+        },
+        playHit() {
+            if (!this.ctx) return;
+            let osc = this.ctx.createOscillator();
+            let gain = this.ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(120, this.ctx.currentTime);
+            osc.frequency.linearRampToValueAtTime(60, this.ctx.currentTime + 0.08);
+            gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + 0.08);
+        },
+        playKill() {
+            if (!this.ctx) return;
+            let osc = this.ctx.createOscillator();
+            let gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(600, this.ctx.currentTime + 0.25);
+            gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + 0.3);
+        }
+    };
+
+    // Global Config & Constants
+    const WORLD_SIZE = 3000;
+    const FOOD_COUNT = 350;
+    const BOT_COUNT = 15;
+
+    const canvas = document.getElementById('arena');
+    const ctx = canvas.getContext('2d');
+
+    // System Event Registries
+    let mouse = { x: 0, y: 0, worldX: 0, worldY: 0, down: false };
+    let keys = {};
+    let isPlaying = false;
+
+    // Viewport Object tracking
+    let camera = { x: 0, y: 0, scale: 1 };
+
+    // Weapon/Gun Class Matrix Archetypes
+    const GUNS = {
+        BASIC: { name: 'Basic Blaster', mode: 'single', fireRate: 350, damage: 15, bulletSpeed: 9, bulletSize: 6, spread: 0, description: 'Standard reliability setup' },
+        TWIN: { name: 'Twin Barrel', mode: 'twin', fireRate: 300, damage: 12, bulletSpeed: 10, bulletSize: 5, spread: 0.05, description: 'Dual parallel fire streams' },
+        TRIPLE: { name: 'Triple Spread', mode: 'triple', fireRate: 400, damage: 14, bulletSpeed: 9, bulletSize: 5.5, spread: 0.25, description: 'Wide directional spatial coverage' },
+        SNIPER: { name: 'Assassins Railgun', mode: 'single', fireRate: 800, damage: 45, bulletSpeed: 16, bulletSize: 8, spread: 0, description: 'Devastating punch, extreme ranges' },
+        MACHINE: { name: 'Hyper Gatling', mode: 'single', fireRate: 120, damage: 8, bulletSpeed: 11, bulletSize: 4.5, spread: 0.18, description: 'Blazing torrent, low accuracy' }
+    };
+
+    // System Upgrades Configurations
+    const UPGRADE_SPECS = [
+        { id: 'maxHp', name: 'Max Integrity', baseCost: 15, costMult: 1.4, increment: 25 },
+        { id: 'speed', name: 'Thruster Speed', baseCost: 10, costMult: 1.35, increment: 0.3 },
+        { id: 'fireRate', name: 'Recoil Cycles', baseCost: 20, costMult: 1.5, increment: 0.08 }, // Reduces fire rate delay
+        { id: 'damage', name: 'Payload Kinetic', baseCost: 15, costMult: 1.4, increment: 3 }
+    ];
+
+    // Data Containers
+    let player = null;
+    let entities = { foods: [], bots: [], bullets: [], particles: [] };
+
+    // Bot Random Identity Dictionary Array
+    const BOT_NAMES = ['AeroBlob', 'CosmoChaser', 'Vortex', 'Quasar', 'MatrixEater', 'TitanGlow', 'Nebula', 'Zenith', 'Phantom', 'Overlord', 'CyberSphere', 'Hydra', 'Viper', 'Helix', 'Apex'];
+
+    // Tracking Classes
+    class BaseBlob {
+        constructor(x, y, name, color, isBot = false) {
+            this.id = Math.random().toString(36).substr(2, 9);
+            this.x = x;
+            this.y = y;
+            this.name = name;
+            this.color = color;
+            this.isBot = isBot;
+            
+            // Scaled base stats setup
+            this.level = 1;
+            this.xp = 0;
+            this.xpNeeded = 100;
+            this.gold = 0;
+            this.iron = 0;
+            this.kills = 0;
+
+            // Core Attributes
+            this.upgradePoints = 0;
+            this.stats = { maxHp: 100, speed: 3.5, fireRate: 1, damage: 0 };
+            
+            this.hp = this.stats.maxHp;
+            this.radius = 28;
+            this.angle = 0;
+            this.lastShotTime = 0;
+            this.gunType = 'BASIC';
+            
+            // Component level metrics for progression
+            this.statLevels = { maxHp: 0, speed: 0, fireRate: 0, damage: 0 };
+        }
+
+        getGunSpec() {
+            let spec = { ...GUNS[this.gunType] };
+            // Inject dynamic modifiers based on calculated stats upgrades
+            spec.damage += this.statLevels.damage * UPGRADE_SPECS.find(s => s.id === 'damage').increment;
+            let rateReduction = this.statLevels.fireRate * UPGRADE_SPECS.find(s => s.id === 'fireRate').increment;
+            spec.fireRate = Math.max(80, spec.fireRate * (1 - rateReduction * 0.15));
+            return spec;
+        }
+
+        getSpeed() {
+            let baseSpeed = this.stats.speed + (this.statLevels.speed * UPGRADE_SPECS.find(s => s.id === 'speed').increment);
+            // Mass penalty mechanic like standard agar.io (bigger is slightly slower)
+            let massFactor = Math.max(0.6, 1 - (this.radius - 28) / 300);
+            return baseSpeed * massFactor;
+        }
+
+        takeDamage(amount, attackerName) {
+            this.hp -= amount;
+            if (this.hp <= 0) {
+                this.hp = 0;
+                return true; // Return state confirming expiration
+            }
+            return false;
+        }
+
+        heal(amount) {
+            let currentMax = this.stats.maxHp + (this.statLevels.maxHp * UPGRADE_SPECS.find(s => s.id === 'maxHp').increment);
+            this.hp = Math.min(currentMax, this.hp + amount);
+        }
+
+        addXp(amount) {
+            this.xp += amount;
+            while (this.xp >= this.xpNeeded) {
+                this.xp -= this.xpNeeded;
+                this.level++;
+                this.upgradePoints++;
+                this.xpNeeded = Math.floor(this.xpNeeded * 1.25);
+                this.radius = Math.min(100, 28 + (this.level * 1.5));
+                
+                if (!this.isBot && isPlaying) {
+                    createKillFeedItem(`🎉 Reached Level ${this.level}!`);
+                    checkEvolutionAvailability();
+                } else if (this.isBot) {
+                    // Auto-allocate upgrade stats for bot simulation intelligence parity
+                    let statKeys = Object.keys(this.statLevels);
+                    let randomKey = statKeys[Math.floor(Math.random() * statKeys.length)];
+                    this.statLevels[randomKey]++;
+                    // Bot occasional random weapon evolution pathing simulation
+                    if (this.level >= 12 && this.gunType === 'BASIC') {
+                        let options = ['TWIN', 'TRIPLE', 'SNIPER', 'MACHINE'];
+                        this.gunType = options[Math.floor(Math.random() * options.length)];
+                    }
+                }
+            }
+        }
+
+        shoot() {
+            let now = Date.now();
+            let spec = this.getGunSpec();
+            if (now - this.lastShotTime < spec.fireRate) return;
+
+            this.lastShotTime = now;
+            if (!this.isBot && isPlaying) Sound.playShoot();
+
+            let targetAngles = [];
+            let cos = Math.cos(this.angle);
+            let sin = Math.sin(this.angle);
+
+            // Barrel configuration structural offsets
+            if (spec.mode === 'single') {
+                targetAngles.push({ a: this.angle, ox: 0, oy: 0 });
+            } else if (spec.mode === 'twin') {
+                // Dual offset streams
+                let perpX = -sin * 12;
+                let perpY = cos * 12;
+                targetAngles.push({ a: this.angle, ox: perpX, oy: perpY });
+                targetAngles.push({ a: this.angle, ox: -perpX, oy: -perpY });
+            } else if (spec.mode === 'triple') {
+                // Wide arc grouping
+                targetAngles.push({ a: this.angle, ox: 0, oy: 0 });
+                targetAngles.push({ a: this.angle - spec.spread, ox: 0, oy: 0 });
+                targetAngles.push({ a: this.angle + spec.spread, ox: 0, oy: 0 });
+            }
+
+            targetAngles.forEach(config => {
+                let bulletSpread = (Math.random() - 0.5) * (spec.spread || 0);
+                let finalAngle = config.a + bulletSpread;
+                
+                // Spawn projectile right past outer boundary skin edge
+                let sx = this.x + cos * this.radius + config.ox;
+                let sy = this.y + sin * this.radius + config.oy;
+
+                entities.bullets.push({
+                    x: sx,
+                    y: sy,
+                    vx: Math.cos(finalAngle) * spec.bulletSpeed,
+                    vy: Math.sin(finalAngle) * spec.bulletSpeed,
+                    radius: spec.bulletSize,
+                    damage: spec.damage,
+                    ownerId: this.id,
+                    ownerName: this.name,
+                    color: this.color,
+                    range: 800,
+                    distanceTraveled: 0
+                });
+            });
+        }
+    }
+
+    // Individual Subclass structures tracking specialized execution cycles
+    class PlayerBlob extends BaseBlob {
+        constructor(x, y, name) {
+            super(x, y, name, '#38bdf8', false);
+        }
+
+        update() {
+            let targetVx = 0;
+            let targetVy = 0;
+
+            // Interface Control Prioritization Mapping (Keyboard Override Mode)
+            if (keys['w'] || keys['arrowup']) targetVy = -1;
+            if (keys['s'] || keys['arrowdown']) targetVy = 1;
+            if (keys['a'] || keys['arrowleft']) targetVx = -1;
+            if (keys['d'] || keys['arrowright']) targetVx = 1;
+
+            let currentSpeed = this.getSpeed();
+
+            if (targetVx !== 0 || targetVy !== 0) {
+                // Normalize vector framework mechanics
+                let mag = Math.sqrt(targetVx * targetVx + targetVy * targetVy);
+                this.x += (targetVx / mag) * currentSpeed;
+                this.y += (targetVy / mag) * currentSpeed;
+                
+                // Update orientation angle dynamically while maneuvering
+                if (!mouse.down) {
+                    this.angle = Math.atan2(targetVy, targetVx);
+                }
+            } else {
+                // Default analog mouse tracing pull tracking
+                let dx = mouse.worldX - this.x;
+                let dy = mouse.worldY - this.y;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist > 10) {
+                    let moveDist = Math.min(currentSpeed, dist * 0.1);
+                    this.x += (dx / dist) * moveDist;
+                    this.y += (dy / dist) * moveDist;
+                }
+            }
+
+            // Always fix rotational lock aiming matching crosshair coordinates tracking
+            this.angle = Math.atan2(mouse.worldY - this.y, mouse.worldX - this.x);
+
+            // Boundary confinement limits logic clamp clamping values
+            this.x = Math.max(this.radius, Math.min(WORLD_SIZE - this.radius, this.x));
+            this.y = Math.max(this.radius, Math.min(WORLD_SIZE - this.radius, this.y));
+
+            // Execute automated trigger fire updates when input pressed bound
+            if (mouse.down || keys[' ']) {
+                this.shoot();
+            }
+
+            // Continuous passive regeneration cycle
+            if (globalTicks % 60 === 0) {
+                this.heal(1);
+            }
+        }
+    }
+
+    class BotBlob extends BaseBlob {
+        constructor(x, y, name, color) {
+            super(x, y, name, color, true);
+            this.targetX = Math.random() * WORLD_SIZE;
+            this.targetY = Math.random() * WORLD_SIZE;
+            this.decisionTick = 0;
+            this.aiState = 'wander'; // wander, flee, chase
+            this.combatTarget = null;
+        }
+
+        update() {
+            this.decisionTick--;
+            
+            // Environment Scan Logic Routine
+            if (this.decisionTick <= 0) {
+                this.decisionTick = 40 + Math.random() * 40;
+                this.scanEnvironment();
+            }
+
+            // State Action Resolution Processing
+            if (this.aiState === 'chase' && this.combatTarget) {
+                this.targetX = this.combatTarget.x;
+                this.targetY = this.combatTarget.y;
+                this.angle = Math.atan2(this.targetY - this.y, this.targetX - this.x);
+                
+                // Fire when range criteria is fully optimized met
+                let dist = Math.getDistance(this, this.combatTarget);
+                if (dist < 500) {
+                    this.shoot();
+                }
+            } else if (this.aiState === 'flee' && this.combatTarget) {
+                // Vector opposition logic conversion
+                let angleAway = Math.atan2(this.y - this.combatTarget.y, this.x - this.combatTarget.x);
+                this.targetX = this.x + Math.cos(angleAway) * 300;
+                this.targetY = this.y + Math.sin(angleAway) * 300;
+                this.angle = angleAway;
+            } else {
+                // Default wander or resource grazing action framework profiling
+                if (Math.random() < 0.02 || Math.getDistance(this, { x: this.targetX, y: this.targetY }) < 50) {
+                    // Hunt closest food element target location index points
+                    let closestFood = findClosestEntity(this, entities.foods);
+                    if (closestFood && Math.getDistance(this, closestFood) < 400) {
+                        this.targetX = closestFood.x;
+                        this.targetY = closestFood.y;
+                    } else {
+                        this.targetX = Math.max(100, Math.min(WORLD_SIZE - 100, this.x + (Math.random() - 0.5) * 600));
+                        this.targetY = Math.max(100, Math.min(WORLD_SIZE - 100, this.y + (Math.random() - 0.5) * 600));
+                    }
+                }
+                this.angle = Math.atan2(this.targetY - this.y, this.targetX - this.x);
+            }
+
+            // Operational Translation Movement Vectors execution mechanics
+            let dx = this.targetX - this.x;
+            let dy = this.targetY - this.y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist > 5) {
+                let speed = this.getSpeed();
+                this.x += (dx / dist) * speed;
+                this.y += (dy / dist) * speed;
+            }
+
+            // Area constraints locking bounds logic checks
+            this.x = Math.max(this.radius, Math.min(WORLD_SIZE - this.radius, this.x));
+            this.y = Math.max(this.radius, Math.min(WORLD_SIZE - this.radius, this.y));
+
+            // Passive periodic heal ticks processing
+            if (globalTicks % 60 === 0) {
+                this.heal(1);
+            }
+        }
+
+        scanEnvironment() {
+            // Find closest potential target metrics context
+            let targetsList = [player, ...entities.bots].filter(e => e && e.id !== this.id && e.hp > 0);
+            if (targetsList.length === 0) return;
+
+            let closest = null;
+            let minDist = 999999;
+
+            targetsList.forEach(t => {
+                let d = Math.getDistance(this, t);
+                if (d < minDist) {
+                    minDist = d;
+                    closest = t;
+                }
+            });
+
+            if (closest && minDist < 450) {
+                // Tactical behavior decision trees matching level/mass strength hierarchies
+                if (closest.level > this.level + 2 || (closest.hp / closest.stats.maxHp < 0.3)) {
+                    this.aiState = 'flee';
+                    this.combatTarget = closest;
+                } else {
+                    this.aiState = 'chase';
+                    this.combatTarget = closest;
+                }
+            } else {
+                this.aiState = 'wander';
+                this.combatTarget = null;
+            }
+        }
+    }
+
+    // Extended Utility Methods Math processing extensions
+    Math.getDistance = function(obj1, obj2) {
+        let dx = obj1.x - obj2.x;
+        let dy = obj1.y - obj2.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    function findClosestEntity(origin, array) {
+        if (array.length === 0) return null;
+        let closest = null;
+        let minDist = 999999;
+        for (let i = 0; i < array.length; i++) {
+            let d = Math.getDistance(origin, array[i]);
+            if (d < minDist) {
+                minDist = d;
+                closest = array[i];
+            }
+        }
+        return closest;
+    }
+
+    // Engine Core Ecosystem Factories
+    function spawnFoodElement() {
+        // Types available: gold (yellow gives gold currency), iron (silver gives metal), generic regular xp (green)
+        let rand = Math.random();
+        let type = 'xp';
+        let color = '#22c55e';
+        let radius = 5 + Math.random() * 4;
+        let value = Math.floor(radius);
+
+        if (rand < 0.15) {
+            type = 'gold';
+            color = varColor('--gold');
+            radius = 6;
+        } else if (rand < 0.40) {
+            type = 'iron';
+            color = varColor('--iron');
+            radius = 7;
+        }
+
+        entities.foods.push({
+            x: Math.random() * WORLD_SIZE,
+            y: Math.random() * WORLD_SIZE,
+            type: type,
+            color: color,
+            radius: radius,
+            value: value
+        });
+    }
+
+    function createExplosionBurstParticles(x, y, color, count = 10) {
+        for (let i = 0; i < count; i++) {
+            let a = Math.random() * Math.PI * 2;
+            let s = 1 + Math.random() * 4;
+            entities.particles.push({
+                x: x,
+                y: y,
+                vx: Math.cos(a) * s,
+                vy: Math.sin(a) * s,
+                radius: 2 + Math.random() * 4,
+                color: color,
+                alpha: 1,
+                decay: 0.02 + Math.random() * 0.03
+            });
+        }
+    }
+
+    function varColor(variableName) {
+        return getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
+    }
+
+    function createKillFeedItem(text) {
+        const feed = document.getElementById('kill-feed');
+        const el = document.createElement('div');
+        el.className = 'feed-item';
+        el.innerText = text;
+        feed.appendChild(el);
+        
+        // Safety self-prune lifecycle cleanup processing handler
+        setTimeout(() => el.remove(), 3000);
+    }
+
+    // System Environment Core Boot Initializers
+    function initArenaWorld() {
+        entities.foods = [];
+        entities.bots = [];
+        entities.bullets = [];
+        entities.particles = [];
+
+        // Build continuous background foods structure layout grid map
+        for (let i = 0; i < FOOD_COUNT; i++) {
+            spawnFoodElement();
+        }
+
+        // Build concurrent dynamic competitive automated agent bot array
+        for (let i = 0; i < BOT_COUNT; i++) {
+            spawnBotAgent();
+        }
+    }
+
+    function spawnBotAgent() {
+        let name = BOT_NAMES[Math.floor(Math.random() * BOT_NAMES.length)];
+        // Add random variations index to prevent exact name clash redundancy errors
+        if (entities.bots.some(b => b.name === name)) {
+            name += ` [${Math.floor(Math.random()*90+10)}]`;
+        }
+        
+        let hue = Math.floor(Math.random() * 360);
+        let color = `hsl(${hue}, 85%, 55%)`;
+        
+        let rx = Math.random() * WORLD_SIZE;
+        let ry = Math.random() * WORLD_SIZE;
+        
+        // Safeguard player spawn isolation parameters proximity
+        if (player) {
+            while (Math.getDistance({ x: rx, y: ry }, player) < 600) {
+                rx = Math.random() * WORLD_SIZE;
+                ry = Math.random() * WORLD_SIZE;
+            }
+        }
+
+        let newBot = new BotBlob(rx, ry, name, color);
+        // Level randomize bots scaling match simulation progression parameters
+        if (player && player.level > 2) {
+            let targetLevel = Math.max(1, player.level + Math.floor((Math.random() - 0.4) * 4));
+            for(let l=1; l<targetLevel; l++) {
+                newBot.addXp(newBot.xpNeeded);
+            }
+        }
+        entities.bots.push(newBot);
+    }
+
+    // Dynamic upgrades UI assembly engine
+    function renderUpgradesDashboard() {
+        const container = document.getElementById('upgrades-container');
+        // Clear all previous items except title child component node structure
+        const titleNode = container.firstElementChild;
+        container.innerHTML = '';
+        container.appendChild(titleNode);
+
+        document.getElementById('upgrade-points').innerText = player.upgradePoints > 0 ? `(${player.upgradePoints} Available)` : '';
+
+        UPGRADE_SPECS.forEach(spec => {
+            let currentLvl = player.statLevels[spec.id];
+            let cost = Math.floor(spec.baseCost * Math.pow(spec.costMult, currentLvl));
+            
+            let row = document.createElement('div');
+            row.className = 'upgrade-row';
+
+            let info = document.createElement('div');
+            info.className = 'upgrade-info';
+            
+            let nameSpan = document.createElement('span');
+            nameSpan.className = 'upgrade-name';
+            nameSpan.innerText = `${spec.name} (Lvl ${currentLvl})`;
+
+            let costSpan = document.createElement('span');
+            costSpan.className = 'upgrade-cost';
+            costSpan.innerHTML = `<span>💰 ${cost} Gold</span>`;
+
+            info.appendChild(nameSpan);
+            info.appendChild(costSpan);
+
+            let btn = document.createElement('button');
+            btn.className = 'upgrade-btn';
+            btn.innerText = 'Upgrade';
+            
+            // Validate financial viability conditions checklist constraint mapping bounds
+            if (player.upgradePoints <= 0 || player.gold < cost) {
+                btn.disabled = true;
+            }
+
+            btn.onclick = () => {
+                purchaseStatUpgrade(spec.id, cost);
+            };
+
+            row.appendChild(info);
+            row.appendChild(btn);
+            container.appendChild(row);
+        });
+    }
+
+    function purchaseStatUpgrade(statId, cost) {
+        if (player.upgradePoints > 0 && player.gold >= cost) {
+            player.gold -= cost;
+            player.upgradePoints--;
+            player.statLevels[statId]++;
+            
+            if (statId === 'maxHp') {
+                // Instantly scale present vitality matching new tier ratios offsets
+                let inc = UPGRADE_SPECS.find(s => s.id === 'maxHp').increment;
+                player.hp += inc;
+            }
+
+            renderUpgradesDashboard();
+            updateHUDMetrics();
+        }
+    }
+
+    function checkEvolutionAvailability() {
+        const popup = document.getElementById('evolution-popup');
+        // Weapon upgrade paths emerge at key profile level break points triggers
+        if ((player.level === 5 || player.level === 10 || player.level === 15) && player.gunType === 'BASIC') {
+            popup.innerHTML = '';
+            popup.style.display = 'flex';
+
+            let opt = [];
+            if (player.level === 5) opt = ['TWIN', 'MACHINE'];
+            if (player.level === 10) opt = ['TRIPLE', 'SNIPER'];
+            if (player.level === 15) opt = ['TWIN', 'TRIPLE', 'SNIPER', 'MACHINE']; // Fallback catchment pathing
+
+            opt.forEach(key => {
+                let g = GUNS[key];
+                let card = document.createElement('div');
+                card.className = 'evolution-card';
+                card.innerHTML = `
+                    <div class="evo-name">${g.name}</div>
+                    <div class="evo-desc">${g.description}</div>
+                `;
+                card.onclick = () => {
+                    player.gunType = key;
+                    popup.style.display = 'none';
+                    createKillFeedItem(`⚔️ Weapon Evolved: ${g.name}!`);
+                };
+                popup.appendChild(card);
+            });
+        }
+    }
+
+    function updateHUDMetrics() {
+        if (!player) return;
+
+        document.getElementById('hud-level').innerText = player.level;
+        document.getElementById('hud-gold').innerText = player.gold;
+        document.getElementById('hud-iron').innerText = player.iron;
+
+        // Health meter bar processing data calculations
+        let maxHpCalculated = player.stats.maxHp + (player.statLevels.maxHp * UPGRADE_SPECS.find(s => s.id === 'maxHp').increment);
+        let hpPct = (player.hp / maxHpCalculated) * 100;
+        document.getElementById('hp-fill').style.width = `${Math.max(0, hpPct)}%`;
+        document.getElementById('hp-text').innerText = `${Math.floor(player.hp)}/${maxHpCalculated}`;
+
+        // XP progression scaling calculations
+        let xpPct = (player.xp / player.xpNeeded) * 100;
+        document.getElementById('xp-fill').style.width = `${xpPct}%`;
+        document.getElementById('xp-text').innerText = `${player.xp}/${player.xpNeeded}`;
+
+        // Build Leaderboard tracking components
+        const board = document.getElementById('leaderboard-list');
+        board.innerHTML = '';
+
+        let allBlobs = [player, ...entities.bots];
+        // Sort descending via calculations metrics weight tracking standard arrays profiling
+        allBlobs.sort((a, b) => b.level - a.level || b.kills - a.kills);
+
+        // Display top 5 contenders ranks
+        allBlobs.slice(0, 5).forEach((b, index) => {
+            let li = document.createElement('li');
+            li.className = `leaderboard-item ${b.id === player.id ? 'self' : ''}`;
+            li.innerHTML = `
+                <span>${index + 1}. ${b.name}</span>
+                <span>Lvl ${b.level}</span>
+            `;
+            board.appendChild(li);
+        });
+    }
+
+    // Engine Core Simulation Compute Updates Frame Loop Cycles Processing
+    let globalTicks = 0;
+    
+    function mainGameSimulationLoop() {
+        globalTicks++;
+        
+        // Handle canvas sizing resolution dynamic configurations matching screen states
+        resizeCanvasToViewport();
+
+        // Canvas Frame Context Clearing Routine prior to fresh redraw paint passes
+        ctx.fillStyle = '#0b0f19';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        if (isPlaying && player) {
+            player.update();
+        }
+
+        // Camera calculations matrix configuration positioning smooth lerp tracking transitions anchor offsets
+        if (player) {
+            camera.x += (player.x - camera.x) * 0.1;
+            camera.y += (player.y - camera.y) * 0.1;
+        }
+
+        // Translate matrix rendering space matching viewport coordinates alignment offsets parameters maps
+        ctx.save();
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.translate(-camera.x, -camera.y);
+
+        // Draw structural Grid Background layout infrastructure lines framework matching canvas boundary conditions map matrix limits
+        drawGridMapBackground();
+
+        // Update & Render Resources loop array
+        for (let i = entities.foods.length - 1; i >= 0; i--) {
+            let f = entities.foods[i];
+            
+            // Draw item circle nodes points assets processing
+            ctx.beginPath();
+            ctx.arc(f.x, f.y, f.radius, 0, Math.PI * 2);
+            ctx.fillStyle = f.color;
+            ctx.fill();
+
+            // Intersect validation processing loop calculation checks bounds skin thresholds triggers matching blob proximity positions fields radius values mapping algorithms
+            if (player && Math.getDistance(player, f) < player.radius + f.radius) {
+                // Absorb resource entity node component action profile allocations
+                if (f.type === 'gold') player.gold += f.value;
+                if (f.type === 'iron') player.iron += f.value;
+                player.addXp(f.value * 3);
+                
+                entities.foods.splice(i, 1);
+                spawnFoodElement();
+                updateHUDMetrics();
+                renderUpgradesDashboard();
+                continue;
+            }
+
+            // Loop checking Bot absorption parameters context arrays matching environmental components boundaries mappings
+            for (let b = 0; b < entities.bots.length; b++) {
+                let bot = entities.bots[b];
+                if (Math.getDistance(bot, f) < bot.radius + f.radius) {
+                    if (f.type === 'gold') bot.gold += f.value;
+                    if (f.type === 'iron') bot.iron += f.value;
+                    bot.addXp(f.value * 3);
+                    
+                    entities.foods.splice(i, 1);
+                    spawnFoodElement();
+                    break;
+                }
+            }
+        }
+
+        // Processing & Rendering Projectile Bullets operations array stack cycles loop metrics maps parameters tracking execution sequences framework components
+        for (let i = entities.bullets.length - 1; i >= 0; i--) {
+            let b = entities.bullets[i];
+            b.x += b.vx;
+            b.y += b.vy;
+            b.distanceTraveled += Math.sqrt(b.vx * b.vx + b.vy * b.vy);
+
+            // Render Bullet
+            ctx.beginPath();
+            ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+            ctx.fillStyle = b.color;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = b.color;
+            ctx.fill();
+            ctx.shadowBlur = 0; // Reset canvas structural shadows shadows metrics bounds
+
+            let bulletDestroyed = false;
+
+            // Range decay limit checks parameters validation filters processing handlers updates rules sets arrays
+            if (b.distanceTraveled > b.range || b.x < 0 || b.x > WORLD_SIZE || b.y < 0 || b.y > WORLD_SIZE) {
+                entities.bullets.splice(i, 1);
+                continue;
+            }
+
+            // Verify structural bullet overlap logic collision targeting player entity instances configurations tracking systems arrays maps structures
+            if (player && b.ownerId !== player.id) {
+                if (Math.getDistance(b, player) < player.radius) {
+                    Sound.playHit();
+                    createExplosionBurstParticles(b.x, b.y, b.color, 4);
+                    let dead = player.takeDamage(b.damage, b.ownerName);
+                    bulletDestroyed = true;
+
+                    if (dead) {
+                        handlePlayerDeathTransition(b.ownerName);
+                    }
+                    updateHUDMetrics();
+                }
+            }
+
+            // Verify structural bullet collision handling mapping against bot array records items cycles
+            if (!bulletDestroyed) {
+                for (let j = entities.bots.length - 1; j >= 0; j--) {
+                    let bot = entities.bots[j];
+                    if (b.ownerId !== bot.id && Math.getDistance(b, bot) < bot.radius) {
+                        if (isPlaying && b.ownerId === player.id) Sound.playHit();
+                        createExplosionBurstParticles(b.x, b.y, b.color, 4);
+                        let dead = bot.takeDamage(b.damage, b.ownerName);
+                        bulletDestroyed = true;
+
+                        if (dead) {
+                            Sound.playKill();
+                            createExplosionBurstParticles(bot.x, bot.y, bot.color, 25);
+                            createKillFeedItem(`☠️ ${b.ownerName} eliminated ${bot.name}`);
+                            
+                            // Attribute reward bounties to the calculated attacking entity profile metrics datasets
+                            awardBountyRewards(b.ownerId, bot.level);
+                            
+                            entities.bots.splice(j, 1);
+                            spawnBotAgent();
+                            updateHUDMetrics();
+                        }
+                        break;
+                    }
+                }
+            }
+
+            if (bulletDestroyed) {
+                entities.bullets.splice(i, 1);
+            }
+        }
+
+        // Update and paint Automated Agents Bots data items loop sequences pipelines context
+        entities.bots.forEach(bot => {
+            bot.update();
+            drawBlobEntityNode(bot);
+        });
+
+        // Update and paint Player instances node element framework pipeline properties tracking structures
+        if (player) {
+            drawBlobEntityNode(player);
+        }
+
+        // Render Particle cloud elements decoration system animations loop tracks channels cycles
+        for (let i = entities.particles.length - 1; i >= 0; i--) {
+            let p = entities.particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.alpha -= p.decay;
+
+            if (p.alpha <= 0) {
+                entities.particles.splice(i, 1);
+                continue;
+            }
+
+            ctx.save();
+            ctx.globalAlpha = p.alpha;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // Render World Arena outer containment edge perimeter walls boundaries frameworks graphics line bars parameters profiles
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 8;
+        ctx.strokeRect(0, 0, WORLD_SIZE, WORLD_SIZE);
+
+        ctx.restore();
+
+        // Cycle continuous frame tracking engine updates recursion pipelines loops calls
+        requestAnimationFrame(mainGameSimulationLoop);
+    }
+
+    // Graphic asset painter implementation pipeline
+    function drawBlobEntityNode(blob) {
+        ctx.save();
+        
+        // Base structure outer skin shadow glow configurations maps parameters pipelines properties parameters tracking configurations properties
+        ctx.shadowBlur = blob.isBot ? 8 : 15;
+        ctx.shadowColor = blob.color;
+
+        // Draw structural Core Body circle node elements
+        ctx.beginPath();
+        ctx.arc(blob.x, blob.y, blob.radius, 0, Math.PI * 2);
+        ctx.fillStyle = blob.color;
+        ctx.fill();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = '#ffffff';
+        ctx.stroke();
+        
+        ctx.shadowBlur = 0; // Restore context properties layout bounds paths pipeline overrides
+
+        // Draw hardware gun barrel appendages lines based on evolution type specs mapping configurations sets profiles templates structure records
+        let spec = blob.getGunSpec();
+        ctx.save();
+        ctx.translate(blob.x, blob.y);
+        ctx.rotate(blob.angle);
+
+        ctx.fillStyle = '#334155';
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 2;
+
+        if (spec.mode === 'single') {
+            let bLength = blob.radius * 0.8 + (spec.bulletSize * 2);
+            let bWidth = spec.bulletSize * 2;
+            ctx.fillRect(0, -bWidth/2, bLength, bWidth);
+            ctx.strokeRect(0, -bWidth/2, bLength, bWidth);
+        } else if (spec.mode === 'twin') {
+            let bLength = blob.radius * 0.8 + (spec.bulletSize * 2);
+            let bWidth = spec.bulletSize * 1.8;
+            ctx.fillRect(0, -bWidth - 3, bLength, bWidth);
+            ctx.strokeRect(0, -bWidth - 3, bLength, bWidth);
+            ctx.fillRect(0, 3, bLength, bWidth);
+            ctx.strokeRect(0, 3, bLength, bWidth);
+        } else if (spec.mode === 'triple') {
+            let bLength = blob.radius * 0.8 + (spec.bulletSize * 2);
+            let bWidth = spec.bulletSize * 1.8;
+            // Center barrel
+            ctx.fillRect(0, -bWidth/2, bLength, bWidth);
+            ctx.strokeRect(0, -bWidth/2, bLength, bWidth);
+            // Angled flank barrels structural offsets layout canvas painters
+            ctx.save(); ctx.rotate(-0.25); ctx.fillRect(0, -bWidth/2, bLength, bWidth); ctx.strokeRect(0, -bWidth/2, bLength, bWidth); ctx.restore();
+            ctx.save(); ctx.rotate(0.25); ctx.fillRect(0, -bWidth/2, bLength, bWidth); ctx.strokeRect(0, -bWidth/2, bLength, bWidth); ctx.restore();
+        }
+
+        ctx.restore();
+
+        // Draw overhead metadata tags text overlay names health progress lines indices records displays text parameters configurations
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = '#000000';
+        ctx.shadowBlur = 4;
+        ctx.fillText(`${blob.name} [${blob.level}]`, blob.x, blob.y - blob.radius - 16);
+        ctx.shadowBlur = 0;
+
+        // Miniature mini health meter bar background tracking metrics paths components links
+        let hbW = blob.radius * 1.5;
+        let hbH = 5;
+        let hbX = blob.x - hbW / 2;
+        let hbY = blob.y - blob.radius - 8;
+
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.6)';
+        ctx.fillRect(hbX, hbY, hbW, hbH);
+
+        let calculatedMax = blob.stats.maxHp + (blob.statLevels.maxHp * UPGRADE_SPECS.find(s => s.id === 'maxHp').increment);
+        let hpRatio = blob.hp / calculatedMax;
+        ctx.fillStyle = hpRatio > 0.4 ? '#22c55e' : '#ef4444';
+        ctx.fillRect(hbX, hbY, hbW * Math.max(0, hpRatio), hbH);
+
+        ctx.restore();
+    }
+
+    function drawGridMapBackground() {
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 1;
+        let gridSpacing = 60;
+
+        // Vertical lines array mapping sequence layout context path bounds sets grid spacing trackers execution blocks paths
+        ctx.beginPath();
+        for (let x = 0; x <= WORLD_SIZE; x += gridSpacing) {
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, WORLD_SIZE);
+        }
+        // Horizontal components array alignment checks trace passes maps pipelines limits definitions lines bounds
+        for (let y = 0; y <= WORLD_SIZE; y += gridSpacing) {
+            ctx.moveTo(0, y);
+            ctx.lineTo(WORLD_SIZE, y);
+        }
+        ctx.stroke();
+    }
+
+    function awardBountyRewards(attackerId, victimLevel) {
+        let goldReward = victimLevel * 10;
+        let ironReward = victimLevel * 5;
+        let xpReward = victimLevel * 40;
+
+        if (player && attackerId === player.id) {
+            player.gold += goldReward;
+            player.iron += ironReward;
+            player.kills++;
+            player.addXp(xpReward);
+            createKillFeedItem(`💰 Bounty Earned! +${goldReward} Gold, +${ironReward} Iron`);
+            updateHUDMetrics();
+            renderUpgradesDashboard();
+        } else {
+            let bot = entities.bots.find(b => b.id === attackerId);
+            if (bot) {
+                bot.gold += goldReward;
+                bot.iron += ironReward;
+                bot.kills++;
+                bot.addXp(xpReward);
+            }
+        }
+    }
+
+    function handlePlayerDeathTransition(killerName) {
+        isPlaying = false;
+        document.getElementById('death-reason').innerText = `You were completely disintegrated by ${killerName}`;
+        document.getElementById('end-level').innerText = player.level;
+        document.getElementById('end-kills').innerText = player.kills;
+        document.getElementById('end-gold').innerText = player.gold;
+        
+        document.getElementById('death-overlay').classList.remove('hidden');
+    }
+
+    function resizeCanvasToViewport() {
+        if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+    }
+
+    // Peripheral Interface Event Listeners Linkers Hooks
+    window.addEventListener('resize', resizeCanvasToViewport);
+    
+    window.addEventListener('keydown', (e) => {
+        keys[e.key.toLowerCase()] = true;
+    });
+    
+    window.addEventListener('keyup', (e) => {
+        keys[e.key.toLowerCase()] = false;
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        let rect = canvas.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+        
+        // Translate local screen tracking into absolute world space points based on active camera tracking values
+        if (player) {
+            mouse.worldX = mouse.x - canvas.width / 2 + camera.x;
+            mouse.worldY = mouse.y - canvas.height / 2 + camera.y;
+        }
+    });
+
+    canvas.addEventListener('mousedown', (e) => {
+        if (e.button === 0) mouse.down = true;
+    });
+
+    window.addEventListener('mouseup', (e) => {
+        if (e.button === 0) mouse.down = false;
+    });
+
+    // Touch Support Hook Linkers for Mobile UI Operations Simulation Compatibility Scaling
+    canvas.addEventListener('touchmove', (e) => {
+        if(e.touches.length > 0) {
+            let rect = canvas.getBoundingClientRect();
+            mouse.x = e.touches[0].clientX - rect.left;
+            mouse.y = e.touches[0].clientY - rect.top;
+            if (player) {
+                mouse.worldX = mouse.x - canvas.width / 2 + camera.x;
+                mouse.worldY = mouse.y - canvas.height / 2 + camera.y;
+            }
+            mouse.down = true; // Auto engage fire during active touch tracking operations
+        }
+    });
+
+    canvas.addEventListener('touchend', () => {
+        mouse.down = false;
+    });
+
+    // Dashboard Buttons Action Bindings Hook Initializers Setup Pipeline Clickers
+    document.getElementById('start-btn').onclick = () => {
+        Sound.init();
+        let nameField = document.getElementById('player-name-input').value.trim();
+        let finalName = nameField || 'PlayerBlob';
+        
+        // Factory construct player asset entity parameters context records items configurations maps properties trackers sets
+        player = new PlayerBlob(WORLD_SIZE / 2, WORLD_SIZE / 2, finalName);
+        
+        initArenaWorld();
+        updateHUDMetrics();
+        renderUpgradesDashboard();
+
+        document.getElementById('menu-overlay').classList.add('hidden');
+        isPlaying = true;
+    };
+
+    document.getElementById('respawn-btn').onclick = () => {
+        document.getElementById('death-overlay').classList.add('hidden');
+        document.getElementById('evolution-popup').style.display = 'none';
+        
+        let nameField = document.getElementById('player-name-input').value.trim();
+        let finalName = nameField || 'PlayerBlob';
+        
+        player = new PlayerBlob(WORLD_SIZE / 2, WORLD_SIZE / 2, finalName);
+        
+        initArenaWorld();
+        updateHUDMetrics();
+        renderUpgradesDashboard();
+        isPlaying = true;
+    };
+
+    // Bootstrap Core Lifecycle Runtime Starts Engine Processing Trigger
+    resizeCanvasToViewport();
+    camera.x = WORLD_SIZE / 2;
+    camera.y = WORLD_SIZE / 2;
+    mainGameSimulationLoop();
+</script>
+
+</body>
+</html>
